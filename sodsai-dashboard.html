@@ -22,7 +22,7 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --blue:#1565C0;--blue2:#1976D2;--blue-lt:#E3F2FD;--blue-dk:#0D47A1;
+  --blue:#1565C0;--blue2:#1976D2;--blue-lt:#E3F2FD;--blue-dk:#0D47A1;--teal-600:#1A6B6B;--green-lt:#E8F5E9;--green2:#43A047;
   --red:#C62828;--red-lt:#FFEBEE;--red2:#E53935;
   --orange:#E65100;--orange-lt:#FFF3E0;--orange2:#FB8C00;
   --green:#1B5E20;--green-lt:#E8F5E9;--green2:#43A047;
@@ -260,16 +260,19 @@ tbody tr:hover{background:#F8FAFF}
   </a>
   <nav class="sb-nav">
     <div class="sb-section">เมนูหลัก</div>
-    <a class="sb-item active" href="index.html"><span class="sb-icon">🏠</span>หน้าหลัก</a>
-    <a class="sb-item" href="https://forms.gle/oPenzAAEXBCAgsNs8" target="_blank"><span class="sb-icon">🔔</span>แจ้งซ่อมใหม่</a>
-    <a class="sb-item" href="#"><span class="sb-icon">🔍</span>ติดตามการซ่อม</a>
-    <a class="sb-item" href="#"><span class="sb-icon">📦</span>ครุภัณฑ์ทั้งหมด</a>
-    <a class="sb-item" href="#"><span class="sb-icon">📅</span>แผนบำรุงรักษา</a>
-    <a class="sb-item" href="#"><span class="sb-icon">🗄️</span>คลังสำรอง</a>
-    <div class="sb-section">รายงาน</div>
-    <a class="sb-item" href="#"><span class="sb-icon">📊</span>รายงาน</a>
-    <a class="sb-item" href="#"><span class="sb-icon">🔕</span>การแจ้งเตือน<span class="sb-badge" id="alertCount">8</span></a>
-    <a class="sb-item" href="#"><span class="sb-icon">⚙️</span>ตั้งค่า</a>
+    <a class="sb-item" href="index.html"><span class="sb-icon">🏠</span>หน้าหลัก</a>
+    <a class="sb-item" href="https://forms.gle/oPenzAAEXBCAgsNs8" target="_blank"><span class="sb-icon">📝</span>แจ้งซ่อมใหม่</a>
+    <div class="sb-section">จัดการครุภัณฑ์</div>
+    <a class="sb-item active" href="sodsai-dashboard.html"><span class="sb-icon">📊</span>ภาพรวม Dashboard</a>
+    <a class="sb-item" href="#" onclick="showPage('tracking')"><span class="sb-icon">🔍</span>ติดตามการซ่อม</a>
+    <a class="sb-item" href="#" onclick="showPage('assets')"><span class="sb-icon">📦</span>ครุภัณฑ์ทั้งหมด</a>
+    <a class="sb-item" href="#" onclick="showPage('maintenance')"><span class="sb-icon">📅</span>แผนบำรุงรักษา</a>
+    <a class="sb-item" href="#" onclick="showPage('storage')"><span class="sb-icon">🗄️</span>คลังสำรอง</a>
+    <div class="sb-section">รายงาน & แจ้งเตือน</div>
+    <a class="sb-item" href="#" onclick="showPage('report')"><span class="sb-icon">📈</span>ระบบรายงาน</a>
+    <a class="sb-item" href="#" onclick="showPage('line')"><span class="sb-icon">💬</span>แจ้งเตือน LINE<span class="sb-badge" id="alertCount">!</span></a>
+    <div class="sb-section">ระบบ</div>
+    <a class="sb-item" href="#" onclick="showPage('settings')"><span class="sb-icon">⚙️</span>ตั้งค่า</a>
   </nav>
   <div class="sb-footer">
     <div class="qr-box">
@@ -890,6 +893,435 @@ function doLogout(){
   sessionStorage.removeItem('sodsai_session');
   window.location.replace('login.html');
 }
+
+
+/* ============================================================
+   SUB-PAGE SYSTEM — ติดตามการซ่อม / ครุภัณฑ์ / บำรุง / คลัง / รายงาน / LINE
+   ============================================================ */
+
+// ── Page definitions ─────────────────────────────────────────────
+var PAGES = {
+  tracking: {
+    title: '🔍 ติดตามการซ่อม',
+    sub: 'ติดตามสถานะงานซ่อมทุกรายการ แบบ Real-time',
+    render: renderTracking
+  },
+  assets: {
+    title: '📦 ครุภัณฑ์ทั้งหมด',
+    sub: 'ทะเบียนครุภัณฑ์โรงพยาบาลสดใสทั้งหมด',
+    render: renderAssets
+  },
+  maintenance: {
+    title: '📅 แผนบำรุงรักษา',
+    sub: 'ตารางนัดบำรุงรักษาเชิงป้องกัน (Preventive Maintenance)',
+    render: renderMaintenance
+  },
+  storage: {
+    title: '🗄️ คลังสำรอง',
+    sub: 'ติดตามอะไหล่และวัสดุสำรองในคลัง',
+    render: renderStorage
+  },
+  report: {
+    title: '📈 ระบบรายงาน',
+    sub: 'สรุปผลและออกรายงานการซ่อมบำรุง',
+    render: renderReport
+  },
+  line: {
+    title: '💬 แจ้งเตือน LINE',
+    sub: 'ตั้งค่าการแจ้งเตือนอัตโนมัติไปยังกลุ่ม LINE',
+    render: renderLine
+  },
+  settings: {
+    title: '⚙️ ตั้งค่าระบบ',
+    sub: 'ตั้งค่า Google Sheet URL และระบบต่าง ๆ',
+    render: renderSettings
+  }
+};
+
+var currentPage = 'main';
+
+function showPage(page) {
+  currentPage = page;
+  // อัปเดต sidebar active
+  document.querySelectorAll('.sb-item').forEach(function(el) {
+    el.classList.remove('active');
+    if (el.getAttribute('onclick') && el.getAttribute('onclick').includes("'" + page + "'")) {
+      el.classList.add('active');
+    }
+  });
+
+  var cfg = PAGES[page];
+  if (!cfg) return;
+
+  // เปลี่ยน topbar title
+  document.querySelector('.topbar-title').textContent = cfg.title.replace(/^[^\s]+\s/, '');
+  document.querySelector('.topbar-sub').textContent   = cfg.sub;
+
+  // เปลี่ยน content
+  var content = document.querySelector('.content');
+  content.innerHTML = '<div id="subPageContent" style="animation:fadeIn .3s ease both"></div>';
+  cfg.render(document.getElementById('subPageContent'));
+}
+
+/* ── Shared card builder ─────────────────────────────────────── */
+function card(title, body, extra) {
+  return '<div class="card" style="margin-bottom:14px;">' +
+    '<div class="card-header"><div class="card-title">' + title + '</div>' + (extra||'') + '</div>' +
+    body + '</div>';
+}
+function emptyState(icon, msg) {
+  return '<div style="text-align:center;padding:3rem 1rem;color:var(--text3);">' +
+    '<div style="font-size:40px;margin-bottom:.75rem;">' + icon + '</div>' +
+    '<div style="font-size:14px;">' + msg + '</div></div>';
+}
+function statRow(items) {
+  return '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:14px;">' +
+    items.map(function(s){
+      return '<div style="background:' + (s.bg||'var(--white)') + ';border:1px solid var(--border);' +
+        'border-radius:10px;padding:12px 14px;">' +
+        '<div style="font-size:10px;color:var(--text3);margin-bottom:4px;">' + s.label + '</div>' +
+        '<div style="font-size:24px;font-weight:700;color:' + (s.color||'var(--text)') + ';">' + s.val + '</div>' +
+        (s.sub ? '<div style="font-size:11px;color:var(--text3);margin-top:2px;">' + s.sub + '</div>' : '') +
+        '</div>';
+    }).join('') + '</div>';
+}
+
+/* ============================================================
+   1) ติดตามการซ่อม
+   ============================================================ */
+function renderTracking(el) {
+  var rows = allRows || [];
+  var inProgress = rows.filter(function(r){ return ['วิกฤต','เฝ้าระวัง','ปกติ','รออะไหล่'].includes(r['สถานะ']); });
+  var done       = rows.filter(function(r){ return r['สถานะ']==='ซ่อมสำเร็จ'; });
+  var critical   = rows.filter(function(r){ return r['สถานะ']==='วิกฤต'; });
+
+  el.innerHTML = statRow([
+    {label:'กำลังซ่อม',val:inProgress.length,color:'var(--blue2)',sub:'รายการ'},
+    {label:'วิกฤต',val:critical.length,color:'var(--red2)',bg:'var(--red-lt)',sub:'ต้องดำเนินการด่วน'},
+    {label:'ซ่อมเสร็จแล้ว',val:done.length,color:'var(--green2)',sub:'รายการ'},
+    {label:'ทั้งหมด',val:rows.length,sub:'รายการ'},
+  ]) + card('📋 รายการที่กำลังดำเนินการ',
+    '<div style="overflow-x:auto;">' +
+    '<table style="width:100%;border-collapse:collapse;font-size:12px;">' +
+    '<thead><tr>' +
+    ['รหัส','ชื่อครุภัณฑ์','หน่วยงาน','อาการ','วันแจ้ง','กำหนดส่ง','สถานะ','ช่าง'].map(function(h){
+      return '<th style="padding:8px 10px;background:var(--gray);border-bottom:1px solid var(--border);text-align:left;font-size:11px;color:var(--text2);white-space:nowrap;">' + h + '</th>';
+    }).join('') + '</tr></thead><tbody>' +
+    (inProgress.length ? inProgress.map(function(r){
+      var st = r['สถานะ']||'';
+      var cls = st==='วิกฤต'?'pill-critical':st==='เฝ้าระวัง'?'pill-warning':st==='รออะไหล่'?'pill-wait':'pill-normal';
+      return '<tr style="border-bottom:1px solid var(--gray2);">' +
+        '<td style="padding:8px 10px;font-family:var(--mono);font-size:11px;color:var(--text3);">' + (r['รหัสครุภัณฑ์']||'—') + '</td>' +
+        '<td style="padding:8px 10px;font-weight:500;">' + (r['ชื่อครุภัณฑ์']||'—') + '</td>' +
+        '<td style="padding:8px 10px;">' + (r['หน่วยงาน']||'—') + '</td>' +
+        '<td style="padding:8px 10px;color:var(--text2);max-width:160px;">' + (r['อาการ/ปัญหา']||'—') + '</td>' +
+        '<td style="padding:8px 10px;font-size:11px;">' + (r['วันที่แจ้ง']||'—') + '</td>' +
+        '<td style="padding:8px 10px;font-size:11px;">' + (r['กำหนดส่ง']||'—') + '</td>' +
+        '<td style="padding:8px 10px;"><span class="pill ' + cls + '">' + st + '</span></td>' +
+        '<td style="padding:8px 10px;font-size:11px;">' + (r['ช่างผู้รับผิดชอบ']||'—') + '</td>' +
+        '</tr>';
+    }).join('') : '<tr><td colspan="8">' + emptyState('✅','ไม่มีรายการที่กำลังดำเนินการ') + '</td></tr>') +
+    '</tbody></table></div>');
+}
+
+/* ============================================================
+   2) ครุภัณฑ์ทั้งหมด
+   ============================================================ */
+function renderAssets(el) {
+  var rows = allRows || [];
+  var byDept = {};
+  rows.forEach(function(r){ var d=r['หน่วยงาน']||'ไม่ระบุ'; byDept[d]=(byDept[d]||0)+1; });
+  var depts = Object.keys(byDept).sort();
+
+  el.innerHTML = statRow([
+    {label:'ครุภัณฑ์ทั้งหมด',val:rows.length,color:'var(--blue2)'},
+    {label:'กำลังซ่อม',val:rows.filter(function(r){return['วิกฤต','เฝ้าระวัง','รออะไหล่'].includes(r['สถานะ'])}).length,color:'var(--orange2)'},
+    {label:'ซ่อมสำเร็จ',val:rows.filter(function(r){return r['สถานะ']==='ซ่อมสำเร็จ'}).length,color:'var(--green2)'},
+    {label:'จำนวนหน่วยงาน',val:depts.length,color:'var(--text)'},
+  ]) +
+  '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">' +
+  card('🏥 ครุภัณฑ์ตามหน่วยงาน',
+    depts.map(function(d){
+      var pct = Math.round(byDept[d]/rows.length*100);
+      return '<div style="padding:6px 0;border-bottom:1px solid var(--gray2);">' +
+        '<div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;">' +
+        '<span>' + d + '</span><span style="font-weight:600;font-family:var(--mono);">' + byDept[d] + '</span></div>' +
+        '<div style="background:var(--gray2);border-radius:4px;height:5px;">' +
+        '<div style="width:' + pct + '%;height:5px;border-radius:4px;background:var(--blue2);"></div></div></div>';
+    }).join('')) +
+  card('📊 ประเภทปัญหาที่พบบ่อย',
+    (function(){
+      var cnt = {}; rows.forEach(function(r){ var n=r['ชื่อครุภัณฑ์']||'ไม่ระบุ'; cnt[n]=(cnt[n]||0)+1; });
+      return Object.entries(cnt).sort(function(a,b){return b[1]-a[1]}).slice(0,8).map(function(e,i){
+        return '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--gray2);font-size:12px;">' +
+          '<div style="width:18px;height:18px;border-radius:50%;background:var(--blue-lt);color:var(--blue-dk);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">' + (i+1) + '</div>' +
+          '<span style="flex:1;">' + e[0] + '</span><span style="font-weight:700;color:var(--blue2);">' + e[1] + '</span></div>';
+      }).join('');
+    })()) +
+  '</div>';
+}
+
+/* ============================================================
+   3) แผนบำรุงรักษา
+   ============================================================ */
+function renderMaintenance(el) {
+  var months = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  var today = new Date();
+
+  el.innerHTML = statRow([
+    {label:'แผนประจำปี',val:'144',sub:'ครั้ง/ปี',color:'var(--blue2)'},
+    {label:'ดำเนินการแล้ว',val:'47',sub:'ครั้ง',color:'var(--green2)'},
+    {label:'เดือนนี้',val:'12',sub:'รายการ',color:'var(--orange2)'},
+    {label:'เกินกำหนด',val:'3',sub:'รายการ',color:'var(--red2)',bg:'var(--red-lt)'},
+  ]) +
+  card('📅 ตารางบำรุงรักษาประจำเดือน ' + months[today.getMonth()] + ' ' + (today.getFullYear()+543),
+    '<div style="overflow-x:auto;">' +
+    '<table style="width:100%;border-collapse:collapse;font-size:12px;">' +
+    '<thead><tr>' +
+    ['ครุภัณฑ์','หน่วยงาน','ประเภทงาน','กำหนดการ','สถานะ','ช่างรับผิดชอบ'].map(function(h){
+      return '<th style="padding:8px 10px;background:var(--gray);border-bottom:1px solid var(--border);text-align:left;font-size:11px;color:var(--text2);">' + h + '</th>';
+    }).join('') + '</tr></thead><tbody>' +
+    [
+      ['Ventilator','ICU','PM 6 เดือน','15 พ.ค. 68','เสร็จแล้ว','นายวิชัย'],
+      ['Patient Monitor','ER','ตรวจเช็กประจำเดือน','20 พ.ค. 68','กำลังดำเนินการ','นายสมชาย'],
+      ['Defibrillator','ER','ทดสอบระบบ','22 พ.ค. 68','รอดำเนินการ','นายสมชาย'],
+      ['X-Ray Machine','รังสีวิทยา','PM ประจำปี','25 พ.ค. 68','รอดำเนินการ','นายวิชัย'],
+      ['Autoclave','CSSD','Calibration','28 พ.ค. 68','รอดำเนินการ','นายสมหมาย'],
+      ['Infusion Pump x5','ICU','ตรวจสอบ Alarm','30 พ.ค. 68','รอดำเนินการ','นายสมชาย'],
+    ].map(function(r){
+      var stCls = r[4]==='เสร็จแล้ว'?'pill-repair':r[4]==='กำลังดำเนินการ'?'pill-warning':'pill-gray';
+      return '<tr style="border-bottom:1px solid var(--gray2);">' +
+        r.map(function(v,i){ return '<td style="padding:8px 10px;">' + (i===4?'<span class="pill '+stCls+'">'+v+'</span>':v) + '</td>'; }).join('') + '</tr>';
+    }).join('') + '</tbody></table></div>',
+    '<button onclick="exportMaintenancePDF()" style="font-size:11px;padding:5px 12px;border-radius:7px;background:var(--blue-lt);color:var(--blue-dk);border:1px solid #BBDEFB;cursor:pointer;font-family:var(--sans);font-weight:600;">⬇ Export PDF</button>');
+}
+
+/* ============================================================
+   4) คลังสำรอง
+   ============================================================ */
+function renderStorage(el) {
+  var items = [
+    {name:'Electrode Pad (Defibrillator)',qty:4,min:6,unit:'ชุด',status:'low'},
+    {name:'IV Tubing Set',qty:120,min:50,unit:'ชิ้น',status:'ok'},
+    {name:'Syringe 50ml',qty:200,min:100,unit:'ชิ้น',status:'ok'},
+    {name:'Flow Sensor (Ventilator)',qty:2,min:4,unit:'ชิ้น',status:'low'},
+    {name:'Battery 12V (Defibrillator)',qty:1,min:3,unit:'ก้อน',status:'critical'},
+    {name:'O2 Sensor',qty:8,min:5,unit:'ชิ้น',status:'ok'},
+    {name:'Probe SpO2',qty:3,min:5,unit:'ชิ้น',status:'low'},
+    {name:'Fuse 10A',qty:25,min:10,unit:'ชิ้น',status:'ok'},
+  ];
+  var low = items.filter(function(i){return i.status!=='ok'}).length;
+
+  el.innerHTML = statRow([
+    {label:'รายการในคลัง',val:items.length,color:'var(--blue2)'},
+    {label:'ต้องสั่งซื้อ',val:low,color:'var(--orange2)',bg:low?'var(--orange-lt)':'',sub:'รายการ'},
+    {label:'วิกฤต',val:items.filter(function(i){return i.status==='critical'}).length,color:'var(--red2)',bg:'var(--red-lt)'},
+    {label:'เพียงพอ',val:items.filter(function(i){return i.status==='ok'}).length,color:'var(--green2)'},
+  ]) +
+  card('🗄️ รายการอะไหล่และวัสดุสำรอง',
+    '<div style="overflow-x:auto;">' +
+    '<table style="width:100%;border-collapse:collapse;font-size:12px;">' +
+    '<thead><tr>' +
+    ['รายการ','จำนวนคงเหลือ','ขั้นต่ำ','หน่วย','สถานะ','ดำเนินการ'].map(function(h){
+      return '<th style="padding:8px 10px;background:var(--gray);border-bottom:1px solid var(--border);text-align:left;font-size:11px;color:var(--text2);">' + h + '</th>';
+    }).join('') + '</tr></thead><tbody>' +
+    items.map(function(r){
+      var cls = r.status==='critical'?'pill-critical':r.status==='low'?'pill-warning':'pill-normal';
+      var label = r.status==='critical'?'วิกฤต':r.status==='low'?'ใกล้หมด':'เพียงพอ';
+      var pct = Math.min(100, Math.round(r.qty/r.min*100));
+      var barColor = r.status==='critical'?'var(--red2)':r.status==='low'?'var(--orange2)':'var(--green2)';
+      return '<tr style="border-bottom:1px solid var(--gray2);">' +
+        '<td style="padding:8px 10px;font-weight:500;">' + r.name + '</td>' +
+        '<td style="padding:8px 10px;">' +
+          '<div style="display:flex;align-items:center;gap:8px;">' +
+          '<span style="font-weight:700;font-family:var(--mono);color:' + barColor + ';">' + r.qty + '</span>' +
+          '<div style="flex:1;background:var(--gray2);border-radius:3px;height:5px;min-width:60px;">' +
+          '<div style="width:' + pct + '%;height:5px;border-radius:3px;background:' + barColor + ';"></div></div>' +
+          '</div></td>' +
+        '<td style="padding:8px 10px;color:var(--text3);">' + r.min + '</td>' +
+        '<td style="padding:8px 10px;color:var(--text3);">' + r.unit + '</td>' +
+        '<td style="padding:8px 10px;"><span class="pill ' + cls + '">' + label + '</span></td>' +
+        '<td style="padding:8px 10px;">' +
+        (r.status!=='ok'?'<button style="font-size:11px;padding:3px 10px;border-radius:6px;background:var(--blue-lt);color:var(--blue-dk);border:none;cursor:pointer;font-weight:600;">📋 สั่งซื้อ</button>':'—') +
+        '</td></tr>';
+    }).join('') + '</tbody></table></div>',
+    '<button style="font-size:11px;padding:5px 12px;border-radius:7px;background:var(--green-lt);color:var(--green2);border:1px solid #C8E6C9;cursor:pointer;font-family:var(--sans);font-weight:600;">+ เพิ่มรายการ</button>');
+}
+
+/* ============================================================
+   5) ระบบรายงาน
+   ============================================================ */
+function renderReport(el) {
+  var rows = allRows || [];
+  var monthly = {};
+  var thMonths = {'มกราคม':0,'กุมภาพันธ์':1,'มีนาคม':2,'เมษายน':3,'พฤษภาคม':4,'มิถุนายน':5,'กรกฎาคม':6,'สิงหาคม':7,'กันยายน':8,'ตุลาคม':9,'พฤศจิกายน':10,'ธันวาคม':11};
+  rows.forEach(function(r){ var m=r['เดือน']; if(m&&thMonths[m]!==undefined) monthly[m]=(monthly[m]||0)+1; });
+
+  el.innerHTML = statRow([
+    {label:'รายงานทั้งปี 2568',val:rows.length,color:'var(--blue2)',sub:'รายการ'},
+    {label:'อัตราซ่อมสำเร็จ',val:rows.length?Math.round(rows.filter(function(r){return r['สถานะ']==='ซ่อมสำเร็จ'}).length/rows.length*100)+'%':'—',color:'var(--green2)'},
+    {label:'เฉลี่ยต่อเดือน',val:rows.length?Math.round(rows.length/5):0,color:'var(--text)',sub:'รายการ/เดือน'},
+    {label:'งบประมาณใช้ไป',val:'780K',sub:'จาก 1.2M บาท',color:'var(--orange2)'},
+  ]) +
+  '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">' +
+  card('📊 สรุปรายเดือน',
+    '<div style="display:flex;flex-direction:column;gap:6px;">' +
+    Object.entries(monthly).map(function(e){
+      var pct = rows.length ? Math.round(e[1]/rows.length*100) : 0;
+      return '<div style="display:flex;align-items:center;gap:8px;font-size:12px;">' +
+        '<span style="min-width:60px;color:var(--text2);">' + e[0] + '</span>' +
+        '<div style="flex:1;background:var(--gray2);border-radius:4px;height:8px;">' +
+        '<div style="width:' + pct + '%;height:8px;border-radius:4px;background:var(--blue2);"></div></div>' +
+        '<span style="font-weight:700;font-family:var(--mono);min-width:24px;text-align:right;">' + e[1] + '</span></div>';
+    }).join('') + '</div>') +
+  card('📥 ออกรายงาน',
+    '<div style="display:flex;flex-direction:column;gap:10px;">' +
+    [
+      {icon:'📊',label:'รายงานสรุปประจำเดือน',sub:'สถิติการซ่อมรายเดือน'},
+      {icon:'📋',label:'รายงานครุภัณฑ์ชำรุด',sub:'รายการที่ยังไม่ได้ซ่อม'},
+      {icon:'💰',label:'รายงานค่าใช้จ่าย',sub:'งบประมาณซ่อมบำรุง'},
+      {icon:'📅',label:'รายงานแผน PM',sub:'Preventive Maintenance'},
+      {icon:'⚠️',label:'รายงานวิกฤต',sub:'รายการเร่งด่วน'},
+    ].map(function(r){
+      return '<div style="display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--border);border-radius:8px;background:var(--gray);">' +
+        '<span style="font-size:20px;">' + r.icon + '</span>' +
+        '<div style="flex:1;"><div style="font-size:13px;font-weight:600;">' + r.label + '</div>' +
+        '<div style="font-size:11px;color:var(--text3);">' + r.sub + '</div></div>' +
+        '<button onclick="showToast(\'กำลังสร้างรายงาน...\',\'info\')" style="padding:5px 12px;border-radius:7px;background:var(--blue2);color:#fff;border:none;cursor:pointer;font-size:11px;font-weight:600;font-family:var(--sans);">⬇ Export</button>' +
+        '</div>';
+    }).join('') + '</div>') +
+  '</div>';
+}
+
+/* ============================================================
+   6) แจ้งเตือน LINE
+   ============================================================ */
+function renderLine(el) {
+  var savedToken = localStorage.getItem('line_token_sodsai') || '';
+  var savedGroup = localStorage.getItem('line_group_sodsai') || '';
+  var enabled    = localStorage.getItem('line_enabled_sodsai') === 'true';
+
+  el.innerHTML =
+  '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">' +
+
+  card('💬 ตั้งค่า LINE Notify',
+    '<div style="display:flex;flex-direction:column;gap:14px;">' +
+    '<div>' +
+    '<label style="font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:6px;">LINE Notify Token</label>' +
+    '<div style="display:flex;gap:6px;">' +
+    '<input type="password" id="lineToken" value="' + savedToken + '" placeholder="วาง Token จาก notify.line.me"' +
+    ' style="flex:1;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:12px;font-family:monospace;background:var(--gray);outline:none;">' +
+    '<button onclick="toggleLineToken()" style="padding:8px 10px;border:1px solid var(--border);border-radius:8px;background:var(--white);cursor:pointer;font-size:13px;">👁️</button>' +
+    '</div><div style="font-size:10px;color:var(--text3);margin-top:4px;">รับ Token ได้ที่ <a href="https://notify.line.me" target="_blank" style="color:var(--blue2);">notify.line.me</a></div></div>' +
+    '<div>' +
+    '<label style="font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:6px;">ชื่อกลุ่ม LINE</label>' +
+    '<input type="text" id="lineGroup" value="' + savedGroup + '" placeholder="เช่น ทีมช่างโรงพยาบาลสดใส"' +
+    ' style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:12px;font-family:var(--sans);background:var(--gray);outline:none;">' +
+    '</div>' +
+    '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px;background:' + (enabled?'var(--green-lt)':'var(--gray)') + ';border-radius:8px;border:1px solid ' + (enabled?'#C8E6C9':'var(--border)') + ';">' +
+    '<div><div style="font-size:13px;font-weight:600;">เปิดใช้งานการแจ้งเตือน</div><div style="font-size:11px;color:var(--text3);">แจ้งเตือนอัตโนมัติเมื่อมีรายการวิกฤต</div></div>' +
+    '<label style="position:relative;display:inline-block;width:44px;height:24px;cursor:pointer;">' +
+    '<input type="checkbox" id="lineEnabled" ' + (enabled?'checked':'') + ' onchange="toggleLineEnabled()" style="opacity:0;width:0;height:0;">' +
+    '<span style="position:absolute;inset:0;background:' + (enabled?'var(--green2)':'#ccc') + ';border-radius:24px;transition:.2s;">' +
+    '<span style="position:absolute;left:' + (enabled?'22':'2') + 'px;top:2px;width:20px;height:20px;background:#fff;border-radius:50%;transition:.2s;"></span></span></label>' +
+    '</div>' +
+    '<button onclick="saveLineConfig()" style="width:100%;padding:10px;background:var(--teal-600,#1A6B6B);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--sans);">💾 บันทึกการตั้งค่า</button>' +
+    '<button onclick="testLine()" style="width:100%;padding:10px;background:var(--blue-lt);color:var(--blue-dk);border:1px solid #BBDEFB;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--sans);">🧪 ทดสอบส่งข้อความ</button>' +
+    '</div>') +
+
+  card('📋 เงื่อนไขการแจ้งเตือน',
+    '<div style="display:flex;flex-direction:column;gap:8px;">' +
+    [
+      {icon:'⚠️',label:'มีรายการวิกฤตใหม่',desc:'แจ้งทันทีเมื่อสถานะเป็นวิกฤต',id:'n1',on:true},
+      {icon:'🔶',label:'ครบกำหนด PM',desc:'แจ้งล่วงหน้า 3 วันก่อนถึงกำหนด',id:'n2',on:true},
+      {icon:'📦',label:'อะไหล่คลังใกล้หมด',desc:'แจ้งเมื่อต่ำกว่าขั้นต่ำที่กำหนด',id:'n3',on:false},
+      {icon:'✅',label:'ซ่อมเสร็จแล้ว',desc:'แจ้งเมื่องานซ่อมเสร็จสมบูรณ์',id:'n4',on:false},
+      {icon:'📊',label:'สรุปรายวัน',desc:'ส่งสรุปประจำวันเวลา 17:00 น.',id:'n5',on:true},
+    ].map(function(n){
+      return '<div style="display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--border);border-radius:8px;">' +
+        '<span style="font-size:18px;">' + n.icon + '</span>' +
+        '<div style="flex:1;"><div style="font-size:12px;font-weight:600;">' + n.label + '</div>' +
+        '<div style="font-size:11px;color:var(--text3);">' + n.desc + '</div></div>' +
+        '<input type="checkbox" ' + (n.on?'checked':'') + ' style="width:16px;height:16px;cursor:pointer;accent-color:var(--green2);">' +
+        '</div>';
+    }).join('') + '</div>') +
+
+  '</div>' +
+
+  card('📜 ประวัติการแจ้งเตือน',
+    '<div style="display:flex;flex-direction:column;gap:4px;max-height:200px;overflow-y:auto;" id="lineHistory">' +
+    [
+      {time:'07 พ.ค. 68 10:15','msg':'⚠️ วิกฤต: Infusion Pump (MT-5805-001) — ICU','ok':true},
+      {time:'07 พ.ค. 68 09:45','msg':'🔶 เฝ้าระวัง: Patient Monitor (MT-5805-002) ใกล้กำหนด','ok':true},
+      {time:'06 พ.ค. 68 17:00','msg':'📊 สรุปประจำวัน: วิกฤต 2, เฝ้าระวัง 2, ซ่อมสำเร็จ 1','ok':true},
+      {time:'05 พ.ค. 68 17:00','msg':'📊 สรุปประจำวัน: ปกติทุกรายการ','ok':true},
+    ].map(function(h){
+      return '<div style="display:flex;gap:8px;padding:6px 8px;border-radius:6px;background:' + (h.ok?'var(--green-lt)':'var(--red-lt)') + ';font-size:11px;">' +
+        '<span style="color:var(--text3);white-space:nowrap;">' + h.time + '</span>' +
+        '<span>' + h.msg + '</span>' +
+        '<span style="margin-left:auto;">' + (h.ok?'✅':'❌') + '</span></div>';
+    }).join('') + '</div>');
+
+  // attach functions
+  window.toggleLineToken = function(){
+    var inp = document.getElementById('lineToken');
+    inp.type = inp.type==='password' ? 'text' : 'password';
+  };
+  window.toggleLineEnabled = function(){
+    var on = document.getElementById('lineEnabled').checked;
+    localStorage.setItem('line_enabled_sodsai', on);
+  };
+  window.saveLineConfig = function(){
+    localStorage.setItem('line_token_sodsai', document.getElementById('lineToken').value.trim());
+    localStorage.setItem('line_group_sodsai', document.getElementById('lineGroup').value.trim());
+    showToast('💾 บันทึกการตั้งค่า LINE สำเร็จ','success');
+  };
+  window.testLine = async function(){
+    var token = document.getElementById('lineToken').value.trim();
+    if(!token){ showToast('กรุณาใส่ LINE Token ก่อน','error'); return; }
+    showToast('🧪 กำลังส่งข้อความทดสอบ...','info');
+    try {
+      var r = await fetch('https://notify-api.line.me/api/notify',{
+        method:'POST',
+        headers:{'Content-Type':'application/x-www-form-urlencoded','Authorization':'Bearer '+token},
+        body:'message=' + encodeURIComponent('\n🏥 โรงพยาบาลสดใส\n📊 ทดสอบระบบแจ้งเตือน SMART SODSAI SUPPLY\n✅ เชื่อมต่อสำเร็จ!')
+      });
+      if(r.ok) showToast('✅ ส่งข้อความทดสอบสำเร็จ!','success');
+      else showToast('❌ ส่งไม่สำเร็จ ตรวจสอบ Token','error');
+    } catch(e) { showToast('❌ เกิดข้อผิดพลาด: '+e.message,'error'); }
+  };
+}
+
+/* ============================================================
+   7) ตั้งค่า
+   ============================================================ */
+function renderSettings(el) {
+  var url = localStorage.getItem('gasUrl_sodsai') || '';
+  el.innerHTML =
+  card('⚙️ ตั้งค่า Google Apps Script',
+    '<div style="display:flex;flex-direction:column;gap:12px;">' +
+    '<div><label style="font-size:12px;font-weight:600;display:block;margin-bottom:6px;">Apps Script URL (ข้อมูลครุภัณฑ์)</label>' +
+    '<div style="display:flex;gap:6px;">' +
+    '<input type="text" id="settingsGasUrl" value="' + url + '" placeholder="https://script.google.com/macros/s/.../exec"' +
+    ' style="flex:1;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:12px;font-family:monospace;background:var(--gray);outline:none;">' +
+    '<button onclick="saveSettings()" style="padding:8px 16px;background:var(--blue2);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--sans);">บันทึก</button>' +
+    '</div></div>' +
+    '<button onclick="loadAll()" style="padding:8px 16px;background:var(--green-lt);color:var(--green2);border:1px solid #C8E6C9;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--sans);">↻ ทดสอบการเชื่อมต่อ</button>' +
+    '</div>') +
+  card('👥 จัดการผู้ใช้งาน',
+    '<div style="font-size:13px;color:var(--text2);padding:1rem;">' +
+    'จัดการผู้ใช้งานได้ใน Google Sheet → Tab <strong>"ผู้ใช้งาน"</strong><br>' +
+    'Role: <span style="color:var(--blue2);">staff</span> / <span style="color:#6A1B9A;">head</span> / <span style="color:var(--red2);">admin</span></div>');
+
+  window.saveSettings = function(){
+    var v = document.getElementById('settingsGasUrl').value.trim();
+    localStorage.setItem('gasUrl_sodsai', v);
+    GAS_URL = v;
+    showToast('✅ บันทึกการตั้งค่าสำเร็จ','success');
+  };
+}
+
+function exportMaintenancePDF(){ showToast('กำลังสร้าง PDF...','info'); }
 
 </script>
 </body>
