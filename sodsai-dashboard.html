@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SMART SODSAI SUPPLY — ระบบบริหารครุภัณฑ์</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --blue:#1565C0;--blue2:#1976D2;--blue-lt:#E3F2FD;--blue-dk:#0D47A1;
+  --red:#C62828;--red-lt:#FFEBEE;--red2:#E53935;
+  --orange:#E65100;--orange-lt:#FFF3E0;--orange2:#FB8C00;
+  --green:#1B5E20;--green-lt:#E8F5E9;--green2:#43A047;
+  --yellow:#F9A825;--yellow-lt:#FFFDE7;
+  --gray:#F4F6F9;--gray2:#E8EAF0;--gray3:#9E9E9E;
+  --text:#1A1A2E;--text2:#455A64;--text3:#90A4AE;
+  --white:#FFFFFF;--border:#DEE2EA;
+  --sidebar:220px;--topbar:56px;
+  --sans:'Sarabun',sans-serif;--mono:'IBM Plex Mono',monospace;
+  --shadow:0 1px 4px rgba(0,0,0,.08),0 2px 12px rgba(0,0,0,.06);
+  --shadow2:0 4px 20px rgba(0,0,0,.1);
+}
+body{font-family:var(--sans);background:var(--gray);color:var(--text);font-size:14px;display:flex;min-height:100vh;overflow-x:hidden}
+
+/* ── SIDEBAR ── */
+.sidebar{width:var(--sidebar);background:var(--blue-dk);position:fixed;top:0;left:0;bottom:0;z-index:200;display:flex;flex-direction:column;box-shadow:2px 0 12px rgba(0,0,0,.15)}
+.sb-brand{padding:0 16px;height:var(--topbar);display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(255,255,255,.1)}
+.sb-logo{width:36px;height:36px;border-radius:50%;background:var(--white);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.sb-title{color:var(--white);font-size:13px;font-weight:700;line-height:1.3}
+.sb-sub{color:rgba(255,255,255,.55);font-size:10px}
+.sb-nav{flex:1;overflow-y:auto;padding:8px 0}
+.sb-section{font-size:10px;color:rgba(255,255,255,.4);padding:12px 16px 4px;letter-spacing:.08em;text-transform:uppercase}
+.sb-item{display:flex;align-items:center;gap:10px;padding:9px 16px;cursor:pointer;color:rgba(255,255,255,.75);font-size:13px;font-weight:400;transition:all .15s;position:relative;text-decoration:none}
+.sb-item:hover{background:rgba(255,255,255,.08);color:var(--white)}
+.sb-item.active{background:rgba(255,255,255,.15);color:var(--white);font-weight:600}
+.sb-item.active::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--yellow);border-radius:0 2px 2px 0}
+.sb-icon{font-size:16px;width:20px;text-align:center;flex-shrink:0}
+.sb-badge{margin-left:auto;background:var(--red2);color:#fff;font-size:10px;font-weight:700;padding:1px 7px;border-radius:10px}
+.sb-footer{padding:12px 16px;border-top:1px solid rgba(255,255,255,.1)}
+.qr-box{background:rgba(255,255,255,.08);border-radius:10px;padding:10px;text-align:center}
+.qr-img{width:70px;height:70px;background:var(--white);border-radius:6px;margin:0 auto 6px;display:flex;align-items:center;justify-content:center;font-size:36px}
+.qr-label{font-size:10px;color:rgba(255,255,255,.5);line-height:1.4}
+
+/* ── MAIN ── */
+.main{margin-left:var(--sidebar);flex:1;display:flex;flex-direction:column;min-height:100vh}
+
+/* ── TOPBAR ── */
+.topbar{height:var(--topbar);background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:12px;position:sticky;top:0;z-index:100;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.topbar-title{font-size:18px;font-weight:700;color:var(--blue-dk);letter-spacing:-.3px}
+.topbar-sub{font-size:11px;color:var(--text3);margin-top:1px}
+.topbar-spacer{flex:1}
+.topbar-date{font-size:12px;color:var(--text2);white-space:nowrap}
+.topbar-icon-btn{width:36px;height:36px;border-radius:8px;background:var(--gray);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;font-size:16px;color:var(--text2);transition:background .15s}
+.topbar-icon-btn:hover{background:var(--gray2)}
+.notif-dot{position:absolute;top:5px;right:5px;width:8px;height:8px;border-radius:50%;border:2px solid var(--white)}
+.notif-dot.red{background:var(--red2)}
+.notif-dot.orange{background:var(--orange2)}
+.user-btn{display:flex;align-items:center;gap:8px;padding:4px 10px 4px 4px;border-radius:8px;background:var(--gray);border:1px solid var(--border);cursor:pointer;transition:background .15s}
+.user-btn:hover{background:var(--gray2)}
+.user-avatar{width:28px;height:28px;border-radius:50%;background:var(--blue2);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+.user-name{font-size:12px;font-weight:500}
+.refresh-btn{display:flex;align-items:center;gap:6px;padding:6px 14px;background:var(--blue2);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--sans);transition:all .15s}
+.refresh-btn:hover{background:var(--blue-dk)}
+.refresh-btn.loading .spin{animation:spin .6s linear infinite}
+
+/* ── CONTENT ── */
+.content{padding:16px 20px;flex:1}
+
+/* ── SUMMARY CARDS ── */
+.summary-row{display:grid;grid-template-columns:repeat(3,1fr) 1.4fr;gap:12px;margin-bottom:14px}
+.sum-card{border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:14px;box-shadow:var(--shadow);border:1px solid transparent}
+.sum-card.critical{background:var(--red-lt);border-color:#FFCDD2}
+.sum-card.warning{background:var(--orange-lt);border-color:#FFE0B2}
+.sum-card.normal{background:var(--green-lt);border-color:#C8E6C9}
+.sum-card.summary{background:var(--white);border-color:var(--border)}
+.sum-icon{font-size:28px;flex-shrink:0}
+.sum-body{}
+.sum-label{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.sum-label.c{color:var(--red)}
+.sum-label.w{color:var(--orange)}
+.sum-label.n{color:var(--green)}
+.sum-num{font-size:32px;font-weight:700;line-height:1;margin:2px 0}
+.sum-num.c{color:var(--red2)}
+.sum-num.w{color:var(--orange2)}
+.sum-num.n{color:var(--green2)}
+.sum-desc{font-size:11px;color:var(--text3)}
+.sum-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%}
+.sum-mini{text-align:center;padding:6px 4px;border-radius:8px;background:var(--gray)}
+.sum-mini-num{font-size:18px;font-weight:700;color:var(--blue-dk);display:block;line-height:1}
+.sum-mini-label{font-size:10px;color:var(--text3);margin-top:2px}
+
+/* ── MIDDLE ROW ── */
+.mid-row{display:grid;grid-template-columns:1.1fr 1fr 1fr;gap:12px;margin-bottom:14px}
+.card{background:var(--white);border-radius:12px;padding:14px 16px;box-shadow:var(--shadow);border:1px solid var(--border)}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.card-title{font-size:13px;font-weight:700;color:var(--text)}
+.card-link{font-size:11px;color:var(--blue2);cursor:pointer;text-decoration:none}
+.card-link:hover{text-decoration:underline}
+
+/* top problems list */
+.prob-item{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--gray2);font-size:12px}
+.prob-item:last-child{border-bottom:none}
+.prob-num{width:18px;height:18px;border-radius:50%;background:var(--blue-lt);color:var(--blue-dk);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.prob-name{flex:1;color:var(--text2)}
+.prob-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;white-space:nowrap}
+.pb-red{background:var(--red-lt);color:var(--red2)}
+.pb-orange{background:var(--orange-lt);color:var(--orange)}
+.pb-yellow{background:var(--yellow-lt);color:#F57F17}
+
+/* donut chart area */
+.donut-wrap{position:relative;display:flex;align-items:center;justify-content:center;height:140px}
+.donut-center{position:absolute;text-align:center;pointer-events:none}
+.donut-num{font-size:28px;font-weight:700;color:var(--text);display:block;line-height:1}
+.donut-label{font-size:10px;color:var(--text3)}
+.legend-list{margin-top:8px;display:flex;flex-direction:column;gap:4px}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2)}
+.legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.legend-val{margin-left:auto;font-weight:600;font-family:var(--mono);font-size:11px}
+
+/* avg days gauge */
+.gauge-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 0}
+.gauge-num{font-size:52px;font-weight:700;color:var(--blue-dk);line-height:1}
+.gauge-unit{font-size:13px;color:var(--text3);margin-bottom:8px}
+.gauge-bar-wrap{width:100%;background:var(--gray2);border-radius:6px;height:8px;margin-bottom:8px}
+.gauge-bar{height:8px;border-radius:6px;background:linear-gradient(90deg,var(--green2),var(--yellow),var(--orange2),var(--red2))}
+.gauge-scale{display:flex;justify-content:space-between;font-size:10px;color:var(--text3)}
+.gauge-ref{display:flex;gap:8px;justify-content:center;margin-top:4px}
+.gauge-ref span{font-size:10px;display:flex;align-items:center;gap:3px}
+
+/* ── TABLE ── */
+.table-card{background:var(--white);border-radius:12px;box-shadow:var(--shadow);border:1px solid var(--border);margin-bottom:14px;overflow:hidden}
+.table-toolbar{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--gray2);flex-wrap:wrap}
+.table-title{font-size:13px;font-weight:700;margin-right:4px}
+.filter-select{font-size:12px;padding:5px 10px;border:1px solid var(--border);border-radius:7px;background:var(--white);font-family:var(--sans);color:var(--text);outline:none;cursor:pointer}
+.filter-select:focus{border-color:var(--blue2)}
+.search-wrap{display:flex;align-items:center;gap:6px;border:1px solid var(--border);border-radius:7px;padding:5px 10px;background:var(--white);flex:1;max-width:220px}
+.search-wrap input{border:none;outline:none;font-size:12px;font-family:var(--sans);background:transparent;width:100%;color:var(--text)}
+.table-spacer{flex:1}
+.btn-reload{font-size:11px;padding:5px 12px;border-radius:7px;background:var(--blue-lt);color:var(--blue-dk);border:1px solid #BBDEFB;cursor:pointer;font-family:var(--sans);font-weight:600;transition:all .15s;display:flex;align-items:center;gap:5px}
+.btn-reload:hover{background:#BBDEFB}
+.tbl-wrap{overflow-x:auto;max-height:320px;overflow-y:auto}
+table{width:100%;border-collapse:collapse;font-size:12px;min-width:780px}
+thead th{background:var(--gray);padding:8px 12px;text-align:left;font-size:11px;font-weight:700;color:var(--text2);white-space:nowrap;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:1;letter-spacing:.03em}
+tbody td{padding:8px 12px;border-bottom:1px solid var(--gray2);color:var(--text);vertical-align:middle}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover{background:#F8FAFF}
+.mono{font-family:var(--mono);font-size:11px;color:var(--text3)}
+.pill{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;padding:3px 9px;border-radius:10px;white-space:nowrap}
+.pill::before{content:'';width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.pill-critical{background:var(--red-lt);color:var(--red2)}.pill-critical::before{background:var(--red2)}
+.pill-warning{background:var(--orange-lt);color:var(--orange)}.pill-warning::before{background:var(--orange2)}
+.pill-normal{background:var(--green-lt);color:var(--green2)}.pill-normal::before{background:var(--green2)}
+.pill-repair{background:#E3F2FD;color:#1565C0}.pill-repair::before{background:#1976D2}
+.pill-wait{background:#F3E5F5;color:#6A1B9A}.pill-wait::before{background:#9C27B0}
+.pill-gray{background:var(--gray2);color:var(--text3)}.pill-gray::before{background:var(--text3)}
+.days-badge{display:inline-block;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700;font-family:var(--mono)}
+.days-red{background:var(--red-lt);color:var(--red2)}
+.days-orange{background:var(--orange-lt);color:var(--orange)}
+.days-green{background:var(--green-lt);color:var(--green2)}
+
+/* ── BOTTOM ROW ── */
+.bot-row{display:grid;grid-template-columns:1fr 340px;gap:12px;margin-bottom:14px}
+.chart-wrap{position:relative;height:180px}
+
+/* ── ALERT PANEL ── */
+.alert-panel{background:var(--white);border-radius:12px;box-shadow:var(--shadow);border:1px solid var(--border);overflow:hidden}
+.alert-list{max-height:280px;overflow-y:auto}
+.alert-item{display:flex;gap:10px;padding:10px 14px;border-bottom:1px solid var(--gray2);cursor:pointer;transition:background .15s}
+.alert-item:last-child{border-bottom:none}
+.alert-item:hover{background:var(--gray)}
+.alert-dot2{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.alert-body{flex:1}
+.alert-text{font-size:12px;color:var(--text);line-height:1.5}
+.alert-meta{font-size:10px;color:var(--text3);margin-top:3px}
+.alert-footer{padding:10px 14px;text-align:center;border-top:1px solid var(--gray2)}
+.btn-all-alerts{font-size:12px;color:var(--blue2);background:none;border:none;cursor:pointer;font-family:var(--sans);font-weight:600}
+
+/* ── STATUS LEGEND ── */
+.legend-footer{background:var(--white);border-radius:12px;padding:10px 16px;box-shadow:var(--shadow);border:1px solid var(--border);display:flex;gap:20px;flex-wrap:wrap;align-items:center}
+.legend-footer-item{display:flex;align-items:flex-start;gap:8px;flex:1;min-width:180px}
+.lf-dot{width:12px;height:12px;border-radius:3px;flex-shrink:0;margin-top:3px}
+.lf-title{font-size:12px;font-weight:700;margin-bottom:2px}
+.lf-desc{font-size:11px;color:var(--text3);line-height:1.5}
+
+/* ── URL CONFIG ── */
+.config-bar{background:var(--blue-dk);padding:8px 20px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.config-bar label{font-size:12px;color:rgba(255,255,255,.8);white-space:nowrap}
+.config-bar input{flex:1;min-width:280px;font-size:12px;padding:6px 12px;border-radius:7px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.1);color:var(--white);font-family:var(--mono);outline:none}
+.config-bar input::placeholder{color:rgba(255,255,255,.4)}
+.config-bar input:focus{border-color:rgba(255,255,255,.5);background:rgba(255,255,255,.15)}
+.config-bar button{padding:6px 16px;background:var(--yellow);color:var(--blue-dk);border:none;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--sans);transition:opacity .15s;white-space:nowrap}
+.config-bar button:hover{opacity:.88}
+.config-status{font-size:11px;padding:4px 10px;border-radius:6px;background:rgba(255,255,255,.1);color:rgba(255,255,255,.7);white-space:nowrap}
+
+/* ── PAGINATION ── */
+.pagination{display:flex;align-items:center;gap:4px;padding:10px 16px;border-top:1px solid var(--gray2);font-size:12px;color:var(--text2)}
+.page-info{flex:1}
+.page-btn{width:28px;height:28px;border-radius:6px;border:1px solid var(--border);background:var(--white);cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;transition:all .15s;font-family:var(--sans)}
+.page-btn:hover{background:var(--blue-lt);border-color:#BBDEFB;color:var(--blue-dk)}
+.page-btn.active{background:var(--blue2);border-color:var(--blue2);color:#fff}
+.page-btn:disabled{opacity:.4;cursor:not-allowed}
+
+/* ── LOADING / EMPTY ── */
+.loading-row td{text-align:center;padding:2rem;color:var(--text3)}
+.spin{display:inline-block;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty-box{text-align:center;padding:2rem;color:var(--text3);font-size:13px}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:24px;right:24px;padding:12px 18px;border-radius:10px;font-size:13px;font-weight:500;z-index:9999;box-shadow:var(--shadow2);transform:translateY(80px);opacity:0;transition:all .3s;pointer-events:none}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.success{background:#1B5E20;color:#fff}
+.toast.error{background:var(--red2);color:#fff}
+.toast.info{background:var(--blue-dk);color:#fff}
+
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{animation:fadeIn .3s ease both}
+
+@media(max-width:900px){
+  .sidebar{width:64px}
+  .sb-title,.sb-sub,.sb-section,.sb-badge,.sb-footer{display:none}
+  .sb-item{justify-content:center;padding:12px 0}
+  .sb-icon{width:auto}
+  .main{margin-left:64px}
+  .summary-row{grid-template-columns:1fr 1fr}
+  .mid-row{grid-template-columns:1fr 1fr}
+  .bot-row{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sb-brand">
+    <div class="sb-logo">🏥</div>
+    <div><div class="sb-title">โรงพยาบาลสดใส</div><div class="sb-sub">Sodsai Hospital</div></div>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-section">เมนูหลัก</div>
+    <a class="sb-item active" href="#"><span class="sb-icon">🏠</span>หน้าหลัก</a>
+    <a class="sb-item" href="#"><span class="sb-icon">🔔</span>แจ้งซ่อมใหม่</a>
+    <a class="sb-item" href="#"><span class="sb-icon">🔍</span>ติดตามการซ่อม</a>
+    <a class="sb-item" href="#"><span class="sb-icon">📦</span>ครุภัณฑ์ทั้งหมด</a>
+    <a class="sb-item" href="#"><span class="sb-icon">📅</span>แผนบำรุงรักษา</a>
+    <a class="sb-item" href="#"><span class="sb-icon">🗄️</span>คลังสำรอง</a>
+    <div class="sb-section">รายงาน</div>
+    <a class="sb-item" href="#"><span class="sb-icon">📊</span>รายงาน</a>
+    <a class="sb-item" href="#"><span class="sb-icon">🔕</span>การแจ้งเตือน<span class="sb-badge" id="alertCount">8</span></a>
+    <a class="sb-item" href="#"><span class="sb-icon">⚙️</span>ตั้งค่า</a>
+  </nav>
+  <div class="sb-footer">
+    <div class="qr-box">
+      <div class="qr-img">📱</div>
+      <div class="qr-label">สแกน QR Code<br>เพื่อแจ้งซ่อมผ่านมือถือ</div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- CONFIG BAR -->
+  <div class="config-bar">
+    <label>🔗 Google Apps Script URL:</label>
+    <input type="text" id="gasUrl" placeholder="https://script.google.com/macros/s/XXXXXXXX/exec">
+    <button onclick="connectSheet()">เชื่อมต่อ</button>
+    <span class="config-status" id="configStatus">⚪ ยังไม่ได้เชื่อมต่อ</span>
+  </div>
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div>
+      <div class="topbar-title">SMART SODSAI SUPPLY</div>
+      <div class="topbar-sub">ระบบแจ้งซ่อมและแจ้งเตือนอัจฉริยะ (Maintenance &amp; Alert System)</div>
+    </div>
+    <div class="topbar-spacer"></div>
+    <div class="topbar-date" id="topbarDate"></div>
+    <div class="topbar-icon-btn" title="แจ้งเตือนวิกฤต">🔔<span class="notif-dot red"></span></div>
+    <div class="topbar-icon-btn" title="ข้อความ">💬<span class="notif-dot orange"></span></div>
+    <button class="refresh-btn" onclick="loadAll()" id="refreshBtn">
+      <span class="spin" id="refreshSpin" style="display:none">↻</span>
+      <span>↻</span> รีเฟรชข้อมูล
+    </button>
+    <div class="user-btn">
+      <div class="user-avatar">A</div>
+      <span class="user-name">ผู้ดูแลระบบ</span>
+    </div>
+  </header>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- SUMMARY CARDS -->
+    <div class="summary-row" id="summaryRow">
+      <div class="sum-card critical">
+        <div class="sum-icon">⚠️</div>
+        <div class="sum-body">
+          <div class="sum-label c">วิกฤต (Critical)</div>
+          <div class="sum-num c" id="sumCritical">—</div>
+          <div class="sum-desc">ต้องดำเนินการทันที</div>
+        </div>
+      </div>
+      <div class="sum-card warning">
+        <div class="sum-icon">🔶</div>
+        <div class="sum-body">
+          <div class="sum-label w">เฝ้าระวัง (Warning)</div>
+          <div class="sum-num w" id="sumWarning">—</div>
+          <div class="sum-desc">ใกล้เกินกำหนด</div>
+        </div>
+      </div>
+      <div class="sum-card normal">
+        <div class="sum-icon">✅</div>
+        <div class="sum-body">
+          <div class="sum-label n">ปกติ (Normal)</div>
+          <div class="sum-num n" id="sumNormal">—</div>
+          <div class="sum-desc">อยู่ในระยะเวลาปกติ</div>
+        </div>
+      </div>
+      <div class="sum-card summary">
+        <div class="sum-body" style="width:100%">
+          <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px">📋 ภาพรวมงานซ่อมวันนี้</div>
+          <div class="sum-grid">
+            <div class="sum-mini"><span class="sum-mini-num" id="todayNew">—</span><div class="sum-mini-label">แจ้งซ่อมใหม่</div></div>
+            <div class="sum-mini"><span class="sum-mini-num" id="todayProg">—</span><div class="sum-mini-label">กำลังดำเนินการ</div></div>
+            <div class="sum-mini"><span class="sum-mini-num" id="todayDone">—</span><div class="sum-mini-label">คืนเสร็จแล้ว</div></div>
+            <div class="sum-mini"><span class="sum-mini-num" id="todayOverdue">—</span><div class="sum-mini-label">เลยกำหนด</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MIDDLE ROW -->
+    <div class="mid-row">
+      <!-- Top Problems -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">📌 TOP ปัญหาที่พบบ่อย</div>
+          <a class="card-link" href="#">ดูทั้งหมด →</a>
+        </div>
+        <div id="topProblems">
+          <div class="empty-box">กำลังโหลด...</div>
+        </div>
+      </div>
+
+      <!-- Avg Days Gauge -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">⏱️ ระยะเวลาซ่อมเฉลี่ย (วัน)</div>
+        </div>
+        <div class="gauge-wrap">
+          <div class="gauge-num" id="avgDays">—</div>
+          <div class="gauge-unit">วัน / ครั้ง</div>
+          <div class="gauge-bar-wrap"><div class="gauge-bar" id="gaugeBar" style="width:40%"></div></div>
+          <div class="gauge-scale"><span>🟢 ≤3</span><span>🟡 ≤15</span><span>🔴 &gt;15</span></div>
+          <div style="font-size:11px;color:var(--text3);margin-top:8px;text-align:center">
+            เป้าหมาย ≤ 3 วัน &nbsp;|&nbsp; สูงสุด <span id="maxDays">—</span> วัน &nbsp;|&nbsp; ทั้งหมด <span id="totalRepair">—</span> ครั้ง
+          </div>
+        </div>
+      </div>
+
+      <!-- Dept Donut -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">🏥 สถานะซ่อมตามหน่วยงาน</div>
+          <a class="card-link" href="#">ดูทั้งหมด →</a>
+        </div>
+        <div class="donut-wrap">
+          <canvas id="deptDonut" width="140" height="140" style="max-width:140px;max-height:140px"></canvas>
+          <div class="donut-center">
+            <span class="donut-num" id="donutTotal">—</span>
+            <span class="donut-label">รายการ</span>
+          </div>
+        </div>
+        <div class="legend-list" id="deptLegend"></div>
+      </div>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-card">
+      <div class="table-toolbar">
+        <span class="table-title">📋 ติดตามสถานะการซ่อมทั้งหมด</span>
+        <select class="filter-select" id="filterDept" onchange="applyFilter()">
+          <option value="">— ทุกหน่วยงาน —</option>
+        </select>
+        <select class="filter-select" id="filterStatus" onchange="applyFilter()">
+          <option value="">— ทุกสถานะ —</option>
+          <option value="วิกฤต">วิกฤต</option>
+          <option value="เฝ้าระวัง">เฝ้าระวัง</option>
+          <option value="ปกติ">ปกติ</option>
+          <option value="ซ่อมสำเร็จ">ซ่อมสำเร็จ</option>
+          <option value="รออะไหล่">รออะไหล่</option>
+        </select>
+        <div class="search-wrap">
+          <span>🔍</span>
+          <input type="text" id="searchBox" placeholder="ค้นหา..." oninput="applyFilter()">
+        </div>
+        <div class="table-spacer"></div>
+        <button class="btn-reload" onclick="loadAll()">↻ โหลดใหม่</button>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>รหัสครุภัณฑ์</th>
+              <th>ชื่อครุภัณฑ์</th>
+              <th>หน่วยงาน</th>
+              <th>อาการ/ปัญหา</th>
+              <th>วันที่แจ้ง</th>
+              <th>กำหนดส่ง</th>
+              <th>สถานะ</th>
+              <th>วันที่คืน</th>
+              <th>ระยะเวลาซ่อม</th>
+            </tr>
+          </thead>
+          <tbody id="mainTbody">
+            <tr class="loading-row"><td colspan="9"><span class="spin">⟳</span> กำลังโหลดข้อมูล...</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="pagination">
+        <span class="page-info" id="pageInfo">แสดง 0 รายการ</span>
+        <button class="page-btn" id="prevBtn" onclick="changePage(-1)" disabled>‹</button>
+        <span id="pageBtns"></span>
+        <button class="page-btn" id="nextBtn" onclick="changePage(1)" disabled>›</button>
+      </div>
+    </div>
+
+    <!-- BOTTOM ROW -->
+    <div class="bot-row">
+      <!-- Bar Chart -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">📊 จำนวนการซ่อมรายเดือน</div>
+          <select class="filter-select" id="chartYear" onchange="renderBarChart()">
+            <option>2568</option><option>2567</option>
+          </select>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="barChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Alert Panel -->
+      <div class="alert-panel">
+        <div class="card-header" style="padding:12px 14px;border-bottom:1px solid var(--gray2)">
+          <div class="card-title">🔔 การแจ้งเตือนล่าสุด</div>
+          <a class="card-link" href="#">ดูทั้งหมด →</a>
+        </div>
+        <div class="alert-list" id="alertList">
+          <div class="empty-box">กำลังโหลด...</div>
+        </div>
+        <div class="alert-footer">
+          <button class="btn-all-alerts">🔔 ดูการแจ้งเตือนทั้งหมด</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- LEGEND FOOTER -->
+    <div class="legend-footer">
+      <div class="legend-footer-item">
+        <div class="lf-dot" style="background:var(--red2)"></div>
+        <div><div class="lf-title" style="color:var(--red2)">วิกฤต (Critical)</div><div class="lf-desc">เกินกำหนดซ่อมมากกว่า 3 วัน ต้องดำเนินการทันที ประสานงานผู้รับผิดชอบ</div></div>
+      </div>
+      <div class="legend-footer-item">
+        <div class="lf-dot" style="background:var(--orange2)"></div>
+        <div><div class="lf-title" style="color:var(--orange)">เฝ้าระวัง (Warning)</div><div class="lf-desc">ใกล้ถึงกำหนดส่งภายใน 3 วัน ควรติดตามและเร่งดำเนินการ</div></div>
+      </div>
+      <div class="legend-footer-item">
+        <div class="lf-dot" style="background:var(--green2)"></div>
+        <div><div class="lf-title" style="color:var(--green2)">ปกติ (Normal)</div><div class="lf-desc">อยู่ในระยะเวลาซ่อมที่กำหนด ยังไม่ถึงกำหนดส่งคืน</div></div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* ======================================================
+   STATE & CONFIG
+   ====================================================== */
+let GAS_URL = '';
+let allRows = [];
+let filteredRows = [];
+let currentPage = 1;
+const PAGE_SIZE = 5;
+let donutChart = null;
+let barChartObj = null;
+const DEPT_COLORS = ['#1565C0','#43A047','#FB8C00','#E53935','#8E24AA','#00897B','#F4511E','#6D4C41'];
+
+/* ======================================================
+   INIT
+   ====================================================== */
+window.addEventListener('DOMContentLoaded', () => {
+  updateClock();
+  setInterval(updateClock, 30000);
+  const saved = localStorage.getItem('gasUrl_sodsai');
+  if (saved) {
+    document.getElementById('gasUrl').value = saved;
+    GAS_URL = saved;
+    setConfigStatus('connected');
+    loadAll();
+  } else {
+    loadDemo();
+  }
+});
+
+function updateClock() {
+  const now = new Date();
+  const d = now.toLocaleDateString('th-TH', { day:'numeric', month:'short', year:'numeric' });
+  const t = now.toLocaleTimeString('th-TH', { hour:'2-digit', minute:'2-digit' });
+  document.getElementById('topbarDate').textContent = `${d} · ${t} น.`;
+}
+
+/* ======================================================
+   CONNECT SHEET
+   ====================================================== */
+function connectSheet() {
+  const url = document.getElementById('gasUrl').value.trim();
+  if (!url) { showToast('กรุณาใส่ URL ก่อน', 'error'); return; }
+  GAS_URL = url;
+  localStorage.setItem('gasUrl_sodsai', url);
+  setConfigStatus('connecting');
+  loadAll();
+}
+
+function setConfigStatus(state) {
+  const el = document.getElementById('configStatus');
+  if (state === 'connected')   { el.textContent = '🟢 เชื่อมต่อแล้ว'; el.style.color = '#A5D6A7'; }
+  else if (state === 'connecting') { el.textContent = '🟡 กำลังเชื่อมต่อ...'; el.style.color = '#FFE082'; }
+  else if (state === 'error')  { el.textContent = '🔴 เชื่อมต่อไม่ได้'; el.style.color = '#EF9A9A'; }
+  else                          { el.textContent = '⚪ ยังไม่ได้เชื่อมต่อ'; el.style.color = ''; }
+}
+
+/* ======================================================
+   JSONP FETCH — ใช้แทน fetch() เพื่อข้าม CORS
+   ====================================================== */
+function jsonpFetch(url, params) {
+  return new Promise((resolve, reject) => {
+    const cbName = '_cb_' + Date.now();
+    const script = document.createElement('script');
+    const timeout = setTimeout(() => {
+      cleanup();
+      reject(new Error('Timeout — ตรวจสอบ URL และสิทธิ์ Deploy'));
+    }, 12000);
+
+    function cleanup() {
+      clearTimeout(timeout);
+      delete window[cbName];
+      if (script.parentNode) script.parentNode.removeChild(script);
+    }
+
+    window[cbName] = function(data) { cleanup(); resolve(data); };
+
+    const qs = new URLSearchParams({ ...params, callback: cbName });
+    script.src = `${url}?${qs}`;
+    script.onerror = () => { cleanup(); reject(new Error('โหลด Script ไม่ได้ — URL อาจผิด')); };
+    document.head.appendChild(script);
+  });
+}
+
+async function loadAll() {
+  if (!GAS_URL) { loadDemo(); return; }
+  setLoading(true);
+  try {
+    const json = await jsonpFetch(GAS_URL, { action: 'getAll' });
+    if (json.error) throw new Error(json.error);
+    allRows = json.data || [];
+    setConfigStatus('connected');
+    renderAll();
+    showToast(`โหลดข้อมูล ${allRows.length} รายการ สำเร็จ ✅`, 'success');
+  } catch(e) {
+    setConfigStatus('error');
+    showToast('ไม่สามารถเชื่อมต่อได้: ' + e.message, 'error');
+    loadDemo();
+  } finally {
+    setLoading(false);
+  }
+}
+
+function setLoading(on) {
+  const spin = document.getElementById('refreshSpin');
+  spin.style.display = on ? 'inline-block' : 'none';
+}
+
+/* ======================================================
+   DEMO DATA (fallback)
+   ====================================================== */
+function loadDemo() {
+  allRows = [
+    {รหัสครุภัณฑ์:'MT-5805-001',ชื่อครุภัณฑ์:'Infusion Pump',หน่วยงาน:'ICU',อาการ:'ไม่หยดตามที่ตั้งไว้',วันที่แจ้ง:'20 พ.ค. 68',กำหนดส่ง:'22 พ.ค. 68',สถานะ:'วิกฤต',วันที่คืน:'',ระยะเวลาซ่อม:'10 วัน',เดือน:'พฤษภาคม'},
+    {รหัสครุภัณฑ์:'MT-5805-002',ชื่อครุภัณฑ์:'Patient Monitor',หน่วยงาน:'ER',อาการ:'หน้าจอดับเมื่อเสียบปลั๊ก',วันที่แจ้ง:'19 พ.ค. 68',กำหนดส่ง:'23 พ.ค. 68',สถานะ:'เฝ้าระวัง',วันที่คืน:'',ระยะเวลาซ่อม:'5 วัน',เดือน:'พฤษภาคม'},
+    {รหัสครุภัณฑ์:'MT-5805-003',ชื่อครุภัณฑ์:'Syringe Pump',หน่วยงาน:'หอผู้ป่วย 1',อาการ:'เครื่องค้างบ่อย',วันที่แจ้ง:'18 พ.ค. 68',กำหนดส่ง:'21 พ.ค. 68',สถานะ:'เฝ้าระวัง',วันที่คืน:'',ระยะเวลาซ่อม:'3 วัน',เดือน:'พฤษภาคม'},
+    {รหัสครุภัณฑ์:'MT-5805-004',ชื่อครุภัณฑ์:'Oxygen Concentrator',หน่วยงาน:'หอผู้ป่วย 2',อาการ:'มีเสียงดังผิดปกติ',วันที่แจ้ง:'17 พ.ค. 68',กำหนดส่ง:'20 พ.ค. 68',สถานะ:'ซ่อมสำเร็จ',วันที่คืน:'20 พ.ค. 68',ระยะเวลาซ่อม:'',เดือน:'พฤษภาคม'},
+    {รหัสครุภัณฑ์:'MT-5805-005',ชื่อครุภัณฑ์:'BP Monitor',หน่วยงาน:'OPD',อาการ:'Error รหัสไม่ทราบ',วันที่แจ้ง:'17 พ.ค. 68',กำหนดส่ง:'19 พ.ค. 68',สถานะ:'ซ่อมสำเร็จ',วันที่คืน:'19 พ.ค. 68',ระยะเวลาซ่อม:'',เดือน:'พฤษภาคม'},
+    {รหัสครุภัณฑ์:'MT-5804-021',ชื่อครุภัณฑ์:'Defibrillator',หน่วยงาน:'ER',อาการ:'ชาร์จแบตไม่ขึ้น',วันที่แจ้ง:'10 พ.ค. 68',กำหนดส่ง:'13 พ.ค. 68',สถานะ:'วิกฤต',วันที่คืน:'',ระยะเวลาซ่อม:'15 วัน',เดือน:'พฤษภาคม'},
+    {รหัสครุภัณฑ์:'MT-5804-022',ชื่อครุภัณฑ์:'EKG 12-Lead',หน่วยงาน:'อายุรกรรม',อาการ:'กระดาษไม่ออก',วันที่แจ้ง:'8 พ.ค. 68',กำหนดส่ง:'11 พ.ค. 68',สถานะ:'ปกติ',วันที่คืน:'',ระยะเวลาซ่อม:'2 วัน',เดือน:'พฤษภาคม'},
+    {รหัสครุภัณฑ์:'MT-5804-023',ชื่อครุภัณฑ์:'Ventilator',หน่วยงาน:'ICU',อาการ:'Alarm ดังไม่หยุด',วันที่แจ้ง:'5 พ.ค. 68',กำหนดส่ง:'8 พ.ค. 68',สถานะ:'ซ่อมสำเร็จ',วันที่คืน:'7 พ.ค. 68',ระยะเวลาซ่อม:'2 วัน',เดือน:'พฤษภาคม'},
+    {รหัสครุภัณฑ์:'MT-5803-011',ชื่อครุภัณฑ์:'Infusion Pump',หน่วยงาน:'หอผู้ป่วย 2',อาการ:'ปุ่มกดไม่ตอบสนอง',วันที่แจ้ง:'15 เม.ย. 68',กำหนดส่ง:'18 เม.ย. 68',สถานะ:'ซ่อมสำเร็จ',วันที่คืน:'17 เม.ย. 68',ระยะเวลาซ่อม:'2 วัน',เดือน:'เมษายน'},
+    {รหัสครุภัณฑ์:'MT-5803-012',ชื่อครุภัณฑ์:'Patient Monitor',หน่วยงาน:'ICU',อาการ:'SpO2 ค่าผิดพลาด',วันที่แจ้ง:'10 เม.ย. 68',กำหนดส่ง:'13 เม.ย. 68',สถานะ:'ซ่อมสำเร็จ',วันที่คืน:'12 เม.ย. 68',ระยะเวลาซ่อม:'2 วัน',เดือน:'เมษายน'},
+    {รหัสครุภัณฑ์:'MT-5802-005',ชื่อครุภัณฑ์:'Syringe Pump',หน่วยงาน:'OPD',อาการ:'รั่วซึม',วันที่แจ้ง:'20 มี.ค. 68',กำหนดส่ง:'23 มี.ค. 68',สถานะ:'ซ่อมสำเร็จ',วันที่คืน:'22 มี.ค. 68',ระยะเวลาซ่อม:'2 วัน',เดือน:'มีนาคม'},
+    {รหัสครุภัณฑ์:'MT-5802-006',ชื่อครุภัณฑ์:'Ultrasound',หน่วยงาน:'รังสีวิทยา',อาการ:'ภาพไม่ชัด',วันที่แจ้ง:'15 มี.ค. 68',กำหนดส่ง:'20 มี.ค. 68',สถานะ:'รออะไหล่',วันที่คืน:'',ระยะเวลาซ่อม:'',เดือน:'มีนาคม'},
+  ];
+  renderAll();
+}
+
+/* ======================================================
+   RENDER ALL
+   ====================================================== */
+function renderAll() {
+  buildSummaryCards();
+  buildTopProblems();
+  buildAvgGauge();
+  buildDeptDonut();
+  populateFilters();
+  applyFilter();
+  renderBarChart();
+  buildAlerts();
+}
+
+/* ── Summary Cards ── */
+function buildSummaryCards() {
+  const critical = allRows.filter(r => (r['สถานะ']||'').includes('วิกฤต')).length;
+  const warning  = allRows.filter(r => (r['สถานะ']||'').includes('เฝ้าระวัง')).length;
+  const normal   = allRows.filter(r => !['วิกฤต','เฝ้าระวัง'].some(s => (r['สถานะ']||'').includes(s))).length;
+  const todayStr = new Date().toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'2-digit'}).replace(' ','').replace('2568','68').replace('2567','67');
+  const todayNew  = allRows.filter(r => (r['วันที่แจ้ง']||'').includes(todayStr.split(' ')[0])).length;
+  const todayProg = allRows.filter(r => ['เฝ้าระวัง','ปกติ','วิกฤต','รออะไหล่'].includes(r['สถานะ'])).length;
+  const todayDone = allRows.filter(r => (r['สถานะ']||'').includes('ซ่อมสำเร็จ')).length;
+  const todayOver = allRows.filter(r => (r['สถานะ']||'').includes('วิกฤต')).length;
+  document.getElementById('sumCritical').textContent = critical;
+  document.getElementById('sumWarning').textContent  = warning;
+  document.getElementById('sumNormal').textContent   = normal;
+  document.getElementById('todayNew').textContent    = allRows.length;
+  document.getElementById('todayProg').textContent   = todayProg;
+  document.getElementById('todayDone').textContent   = todayDone;
+  document.getElementById('todayOverdue').textContent= todayOver;
+}
+
+/* ── Top Problems ── */
+function buildTopProblems() {
+  const count = {};
+  allRows.forEach(r => { const n = r['ชื่อครุภัณฑ์']||'ไม่ระบุ'; count[n] = (count[n]||0)+1; });
+  const top5 = Object.entries(count).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const colors = ['pb-red','pb-red','pb-orange','pb-orange','pb-yellow'];
+  const el = document.getElementById('topProblems');
+  if (!top5.length) { el.innerHTML = '<div class="empty-box">ไม่มีข้อมูล</div>'; return; }
+  el.innerHTML = top5.map(([name,cnt],i) => `
+    <div class="prob-item fade-in">
+      <div class="prob-num">${i+1}</div>
+      <div class="prob-name">${name}</div>
+      <span class="prob-badge ${colors[i]}">${cnt} เครื่อง</span>
+    </div>`).join('');
+}
+
+/* ── Avg Days Gauge ── */
+function buildAvgGauge() {
+  const rows = allRows.filter(r => r['ระยะเวลาซ่อม'] && /\d/.test(r['ระยะเวลาซ่อม']));
+  const days = rows.map(r => parseInt(r['ระยะเวลาซ่อม'])||0).filter(d => d>0);
+  const avg = days.length ? Math.round(days.reduce((a,b)=>a+b,0)/days.length) : 0;
+  const maxD = days.length ? Math.max(...days) : 0;
+  document.getElementById('avgDays').textContent = avg || '—';
+  document.getElementById('maxDays').textContent = maxD || '—';
+  document.getElementById('totalRepair').textContent = allRows.length;
+  const pct = Math.min(100, (avg/15)*100);
+  document.getElementById('gaugeBar').style.width = pct + '%';
+}
+
+/* ── Dept Donut ── */
+function buildDeptDonut() {
+  const count = {};
+  allRows.forEach(r => { const d = r['หน่วยงาน']||'ไม่ระบุ'; count[d] = (count[d]||0)+1; });
+  const labels = Object.keys(count);
+  const data   = Object.values(count);
+  const total  = data.reduce((a,b)=>a+b,0);
+  document.getElementById('donutTotal').textContent = total;
+  document.getElementById('alertCount').textContent = allRows.filter(r=>(r['สถานะ']||'').includes('วิกฤต')).length;
+  const canvas = document.getElementById('deptDonut');
+  if (donutChart) donutChart.destroy();
+  donutChart = new Chart(canvas, {
+    type:'doughnut',
+    data:{ labels, datasets:[{ data, backgroundColor:DEPT_COLORS.slice(0,labels.length), borderWidth:0, hoverOffset:4 }] },
+    options:{ responsive:false, cutout:'65%', plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label: ctx => ` ${ctx.label}: ${ctx.parsed} รายการ` } } } }
+  });
+  const legEl = document.getElementById('deptLegend');
+  legEl.innerHTML = labels.slice(0,5).map((l,i) => `
+    <div class="legend-item">
+      <div class="legend-dot" style="background:${DEPT_COLORS[i%DEPT_COLORS.length]}"></div>
+      <span>${l}</span>
+      <span class="legend-val">${count[l]} (${Math.round(count[l]/total*100)}%)</span>
+    </div>`).join('');
+}
+
+/* ── Populate Filters ── */
+function populateFilters() {
+  const depts = [...new Set(allRows.map(r=>r['หน่วยงาน']).filter(Boolean))].sort();
+  const sel = document.getElementById('filterDept');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">— ทุกหน่วยงาน —</option>' + depts.map(d=>`<option value="${d}">${d}</option>`).join('');
+  sel.value = cur;
+}
+
+/* ── Apply Filter & Render Table ── */
+function applyFilter() {
+  const dept   = document.getElementById('filterDept').value;
+  const status = document.getElementById('filterStatus').value;
+  const kw     = document.getElementById('searchBox').value.toLowerCase();
+  filteredRows = allRows.filter(r => {
+    if (dept   && (r['หน่วยงาน']||'') !== dept)     return false;
+    if (status && !(r['สถานะ']||'').includes(status)) return false;
+    if (kw && !Object.values(r).some(v => v.toString().toLowerCase().includes(kw))) return false;
+    return true;
+  });
+  currentPage = 1;
+  renderTable();
+}
+
+function renderTable() {
+  const tbody = document.getElementById('mainTbody');
+  const start = (currentPage-1)*PAGE_SIZE;
+  const slice = filteredRows.slice(start, start+PAGE_SIZE);
+  if (!slice.length) {
+    tbody.innerHTML = '<tr><td colspan="9"><div class="empty-box">📭 ไม่พบข้อมูลที่ตรงกัน</div></td></tr>';
+    renderPagination();
+    return;
+  }
+  tbody.innerHTML = slice.map(r => {
+    const status = r['สถานะ']||'';
+    const dayNum = parseInt(r['ระยะเวลาซ่อม'])||0;
+    const daysCls = dayNum > 10 ? 'days-red' : dayNum > 5 ? 'days-orange' : dayNum > 0 ? 'days-green' : '';
+    const stCls = status.includes('วิกฤต') ? 'pill-critical' : status.includes('เฝ้าระวัง') ? 'pill-warning' : status.includes('ปกติ') ? 'pill-normal' : status.includes('ซ่อมสำเร็จ') ? 'pill-repair' : status.includes('รออะไหล่') ? 'pill-wait' : 'pill-gray';
+    return `<tr class="fade-in">
+      <td class="mono">${r['รหัสครุภัณฑ์']||'—'}</td>
+      <td style="font-weight:500">${r['ชื่อครุภัณฑ์']||'—'}</td>
+      <td>${r['หน่วยงาน']||'—'}</td>
+      <td style="color:var(--text2);max-width:160px;white-space:normal">${r['อาการ']||r['อาการ/ปัญหา']||'—'}</td>
+      <td class="mono" style="font-size:11px">${r['วันที่แจ้ง']||'—'}</td>
+      <td class="mono" style="font-size:11px">${r['กำหนดส่ง']||'—'}</td>
+      <td><span class="pill ${stCls}">${status||'—'}</span></td>
+      <td class="mono" style="font-size:11px">${r['วันที่คืน']||'—'}</td>
+      <td>${dayNum > 0 ? `<span class="days-badge ${daysCls}">${r['ระยะเวลาซ่อม']}</span>` : '<span style="color:var(--text3)">—</span>'}</td>
+    </tr>`;
+  }).join('');
+  renderPagination();
+}
+
+function renderPagination() {
+  const total = filteredRows.length;
+  const pages = Math.ceil(total/PAGE_SIZE);
+  const start = (currentPage-1)*PAGE_SIZE+1;
+  const end   = Math.min(currentPage*PAGE_SIZE, total);
+  document.getElementById('pageInfo').textContent = `แสดง ${total ? start : 0}–${end} จาก ${total} รายการ`;
+  document.getElementById('prevBtn').disabled = currentPage <= 1;
+  document.getElementById('nextBtn').disabled = currentPage >= pages;
+  const btns = document.getElementById('pageBtns');
+  btns.innerHTML = Array.from({length:Math.min(pages,7)},(_,i)=>{
+    const p = i+1;
+    return `<button class="page-btn${p===currentPage?' active':''}" onclick="goPage(${p})">${p}</button>`;
+  }).join('');
+}
+
+function changePage(d) { goPage(currentPage+d); }
+function goPage(p) {
+  const pages = Math.ceil(filteredRows.length/PAGE_SIZE);
+  if (p<1||p>pages) return;
+  currentPage = p;
+  renderTable();
+}
+
+/* ── Bar Chart ── */
+function renderBarChart() {
+  const months = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  const monthMap = {'มกราคม':0,'กุมภาพันธ์':1,'มีนาคม':2,'เมษายน':3,'พฤษภาคม':4,'มิถุนายน':5,'กรกฎาคม':6,'สิงหาคม':7,'กันยายน':8,'ตุลาคม':9,'พฤศจิกายน':10,'ธันวาคม':11};
+  const counts = new Array(12).fill(0);
+  allRows.forEach(r => {
+    const m = r['เดือน']||'';
+    if (monthMap[m] !== undefined) counts[monthMap[m]]++;
+  });
+  // fill some demo if empty
+  if (counts.every(c=>c===0)) {
+    [3,5,8,10,12,7,4,6,9,11,8,5].forEach((v,i)=>counts[i]=v);
+  }
+  const canvas = document.getElementById('barChart');
+  if (barChartObj) barChartObj.destroy();
+  barChartObj = new Chart(canvas, {
+    type:'bar',
+    data:{ labels:months, datasets:[{
+      label:'จำนวนซ่อม',
+      data:counts,
+      backgroundColor: counts.map((_,i) => i===4 ? '#1565C0' : '#BBDEFB'),
+      borderRadius:5, borderSkipped:false
+    }] },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ display:false } },
+      scales:{
+        x:{ grid:{ display:false }, ticks:{ font:{ size:10 } } },
+        y:{ grid:{ color:'rgba(0,0,0,.05)' }, ticks:{ font:{ size:10 }, stepSize:2 } }
+      }
+    }
+  });
+}
+
+/* ── Alerts ── */
+function buildAlerts() {
+  const alerts = allRows.filter(r => ['วิกฤต','เฝ้าระวัง'].includes(r['สถานะ'])).slice(0,8);
+  const el = document.getElementById('alertList');
+  if (!alerts.length) { el.innerHTML = '<div class="empty-box">ไม่มีการแจ้งเตือน</div>'; return; }
+  el.innerHTML = alerts.map(r => {
+    const isCrit = (r['สถานะ']||'').includes('วิกฤต');
+    return `<div class="alert-item fade-in">
+      <div class="alert-dot2" style="background:${isCrit?'var(--red2)':'var(--orange2)'}"></div>
+      <div class="alert-body">
+        <div class="alert-text">${isCrit?'⚠️':'🔶'} <strong>${r['ชื่อครุภัณฑ์']}</strong> — ${r['อาการ']||r['อาการ/ปัญหา']||''}</div>
+        <div class="alert-meta">หน่วยงาน: ${r['หน่วยงาน']||'—'} &nbsp;·&nbsp; แจ้งเมื่อ: ${r['วันที่แจ้ง']||'—'}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ── Toast ── */
+function showToast(msg, type='info') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = `toast ${type}`;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>
