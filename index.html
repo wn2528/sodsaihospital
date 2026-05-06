@@ -217,10 +217,29 @@ nav {
   font-size: 12px; color: rgba(255,255,255,.65); margin-top: 2px;
 }
 .hero-stats {
-  position: absolute; bottom: 0; left: 0; right: 0;
-  background: rgba(255,255,255,.04);
-  border-top: 1px solid rgba(58,160,160,.2);
-  display: flex; animation: fadeUp .8s .6s var(--ease) both;
+  display: none;
+}
+.hero-stats-inline {
+  display: flex; gap: 0;
+  margin-top: 2rem;
+  border-top: 1px solid rgba(58,160,160,.25);
+  padding-top: 1.5rem;
+  animation: fadeUp .8s .6s var(--ease) both;
+  flex-wrap: wrap;
+}
+.hsi {
+  display: flex; flex-direction: column;
+  padding-right: 2rem;
+  margin-bottom: .75rem;
+}
+.hsi-num {
+  font-family: var(--serif);
+  font-size: 2rem; font-weight: 700;
+  color: var(--white); line-height: 1;
+}
+.hsi-label {
+  font-size: 12px; color: rgba(255,255,255,.5);
+  margin-top: 4px; letter-spacing: .04em;
 }
 .hero-stat {
   flex: 1; padding: 1.25rem 2rem;
@@ -740,27 +759,16 @@ footer {
       <a class="btn-primary" href="#contact">📅 นัดหมายแพทย์</a>
       <a class="btn-outline" href="#services">ดูบริการทั้งหมด →</a>
     </div>
+
+    <div class="hero-stats-inline">
+      <div class="hsi"><span class="hsi-num">60</span><span class="hsi-label">จำนวนเตียง</span></div>
+      <div class="hsi"><span class="hsi-num">12</span><span class="hsi-label">แพทย์เฉพาะทาง</span></div>
+      <div class="hsi"><span class="hsi-num">24/7</span><span class="hsi-label">บริการฉุกเฉิน</span></div>
+      <div class="hsi"><span class="hsi-num">30+</span><span class="hsi-label">ปีที่ให้บริการ</span></div>
+    </div>
   </div>
 
   </div><!-- /hero-body -->
-  <div class="hero-stats">
-    <div class="hero-stat">
-      <span class="hero-stat-num">60</span>
-      <span class="hero-stat-label">จำนวนเตียง</span>
-    </div>
-    <div class="hero-stat">
-      <span class="hero-stat-num">12</span>
-      <span class="hero-stat-label">แพทย์เฉพาะทาง</span>
-    </div>
-    <div class="hero-stat">
-      <span class="hero-stat-num">24/7</span>
-      <span class="hero-stat-label">บริการฉุกเฉิน</span>
-    </div>
-    <div class="hero-stat">
-      <span class="hero-stat-num">30+</span>
-      <span class="hero-stat-label">ปีที่ให้บริการ</span>
-    </div>
-  </div>
 </section>
 
 <!-- SERVICES -->
