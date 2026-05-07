@@ -938,10 +938,10 @@ var PAGES = {
   }
 };
 
-var currentPage = 'main';
+var currentSubPage = 'main';
 
 function showPage(page) {
-  currentPage = page;
+  currentSubPage = page;
   // อัปเดต sidebar active
   document.querySelectorAll('.sb-item').forEach(function(el) {
     el.classList.remove('active');
