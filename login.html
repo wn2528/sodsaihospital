@@ -5,206 +5,232 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>เข้าสู่ระบบ — โรงพยาบาลสดใส</title>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Noto+Serif+Thai:wght@600;700&display=swap" rel="stylesheet">
+
+<!-- Google Identity Services -->
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
   --teal-900:#0A2E2E;--teal-800:#0F3D3D;--teal-600:#1A6B6B;--teal-400:#3AA0A0;
   --teal-200:#A8D8D8;--teal-50:#EDF7F7;
-  --gold:#C8973A;--gold-lt:#F5E9D4;
+  --gold:#C8973A;
   --white:#FFFFFF;--cream:#FAF8F4;
   --text:#1A1714;--text2:#4A4540;--text3:#8A837A;
   --red:#C62828;--red-lt:#FFEBEE;
   --green:#1B5E20;--green-lt:#E8F5E9;
+  --blue:#1565C0;--blue-lt:#E3F2FD;
   --serif:'Noto Serif Thai',serif;--sans:'Sarabun',sans-serif;
   --ease:cubic-bezier(.4,0,.2,1);
 }
 html,body{height:100%}
 body{
-  font-family:var(--sans);
-  background:var(--teal-900);
+  font-family:var(--sans); background:var(--teal-900);
   display:flex; align-items:center; justify-content:center;
   min-height:100vh; padding:1rem;
-  position:relative; overflow:hidden;
+  position:relative; overflow-x:hidden;
 }
-
-/* Background pattern */
 body::before{
-  content:'';
-  position:fixed;inset:0;
+  content:''; position:fixed; inset:0;
   background-image:
     radial-gradient(ellipse 70% 60% at 20% 30%, rgba(58,160,160,.15) 0%, transparent 60%),
     radial-gradient(ellipse 50% 50% at 80% 70%, rgba(200,151,58,.07) 0%, transparent 60%);
   pointer-events:none;
 }
 .bg-grid{
-  position:fixed;inset:0;opacity:.04;
+  position:fixed; inset:0; opacity:.04;
   background-image:
-    linear-gradient(rgba(58,160,160,.6) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(58,160,160,.6) 1px,transparent 1px);
-  background-size:48px 48px;
-  pointer-events:none;
+    linear-gradient(rgba(58,160,160,.6) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(58,160,160,.6) 1px, transparent 1px);
+  background-size:48px 48px; pointer-events:none;
 }
-.deco{position:fixed;color:var(--teal-400);opacity:.06;font-size:120px;user-select:none;pointer-events:none;line-height:1}
-.d1{top:8%;left:5%}
-.d2{bottom:10%;right:6%;font-size:80px;opacity:.05}
-.d3{top:50%;left:50%;font-size:40px;opacity:.04}
+.deco{ position:fixed; color:var(--teal-400); opacity:.06; font-size:120px; user-select:none; pointer-events:none; line-height:1 }
+.d1{ top:8%; left:5% } .d2{ bottom:10%; right:6%; font-size:80px; opacity:.05 }
 
 /* Card */
 .card{
-  width:100%;max-width:440px;
-  background:var(--white);
-  border-radius:20px;
-  overflow:hidden;
-  box-shadow:0 24px 80px rgba(0,0,0,.3),0 4px 16px rgba(0,0,0,.15);
-  position:relative;z-index:1;
+  width:100%; max-width:440px;
+  background:var(--white); border-radius:20px; overflow:hidden;
+  box-shadow:0 24px 80px rgba(0,0,0,.3), 0 4px 16px rgba(0,0,0,.15);
+  position:relative; z-index:1;
   animation:slideUp .6s var(--ease) both;
 }
-@keyframes slideUp{
-  from{opacity:0;transform:translateY(32px)}
-  to{opacity:1;transform:translateY(0)}
-}
+@keyframes slideUp{ from{opacity:0;transform:translateY(32px)} to{opacity:1;transform:translateY(0)} }
 
-/* Card header */
 .card-header{
-  background:var(--teal-900);
-  padding:2rem 2rem 1.75rem;
-  text-align:center;
-  position:relative;
-  border-bottom:3px solid var(--gold);
+  background:var(--teal-900); padding:1.75rem 2rem 1.5rem;
+  text-align:center; position:relative; border-bottom:3px solid var(--gold);
 }
 .card-header::before{
-  content:'';
-  position:absolute;inset:0;
+  content:''; position:absolute; inset:0;
   background:radial-gradient(ellipse 80% 60% at 50% 100%, rgba(58,160,160,.2) 0%, transparent 70%);
 }
 .logo-wrap{
-  display:inline-flex;align-items:center;justify-content:center;
-  width:68px;height:68px;border-radius:50%;
-  background:rgba(255,255,255,.08);
-  border:2px solid rgba(58,160,160,.4);
-  margin-bottom:1rem;position:relative;
-  font-size:32px;
+  display:inline-flex; align-items:center; justify-content:center;
+  width:60px; height:60px; border-radius:50%;
+  background:rgba(255,255,255,.08); border:2px solid rgba(58,160,160,.4);
+  margin-bottom:.75rem; position:relative; font-size:28px;
 }
-.logo-wrap img{width:56px;height:56px;border-radius:50%;object-fit:cover}
 .card-title{
-  font-family:var(--serif);font-size:20px;font-weight:700;
-  color:var(--white);margin-bottom:4px;position:relative;
+  font-family:var(--serif); font-size:18px; font-weight:700;
+  color:var(--white); margin-bottom:2px; position:relative;
 }
-.card-sub{font-size:12px;color:rgba(255,255,255,.55);position:relative;letter-spacing:.04em}
+.card-sub{ font-size:11px; color:rgba(255,255,255,.55); position:relative; letter-spacing:.04em }
 
-/* Card body */
-.card-body{padding:2rem}
+/* Tabs */
+.tabs{
+  display:flex; padding:0 1.5rem;
+  border-bottom:1px solid #EDE9E4;
+  background:var(--cream);
+}
+.tab{
+  flex:1; padding:.85rem 0; background:none; border:none;
+  font-family:var(--sans); font-size:13px; font-weight:600;
+  color:var(--text3); cursor:pointer;
+  border-bottom:3px solid transparent;
+  transition:all .15s; margin-bottom:-1px;
+}
+.tab:hover{ color:var(--teal-600) }
+.tab.active{ color:var(--teal-600); border-bottom-color:var(--teal-600); background:var(--white) }
+
+/* Body */
+.card-body{ padding:1.5rem 2rem 1.75rem }
 
 .system-badge{
-  display:flex;align-items:center;justify-content:center;gap:8px;
-  background:var(--teal-50);border:1px solid var(--teal-200);
-  border-radius:10px;padding:.6rem 1rem;
-  font-size:13px;color:var(--teal-600);font-weight:500;
-  margin-bottom:1.75rem;
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  background:var(--teal-50); border:1px solid var(--teal-200);
+  border-radius:10px; padding:.55rem 1rem;
+  font-size:12px; color:var(--teal-600); font-weight:500;
+  margin-bottom:1.25rem;
 }
-.system-badge-dot{width:7px;height:7px;border-radius:50%;background:var(--teal-400);animation:pulse 2s ease-in-out infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.system-badge-dot{ width:7px; height:7px; border-radius:50%; background:var(--teal-400); animation:pulse 2s ease-in-out infinite }
+@keyframes pulse{ 0%,100%{opacity:1} 50%{opacity:.3} }
 
-.form-group{margin-bottom:1.25rem}
+.form-group{ margin-bottom:.85rem }
 label{
-  display:block;font-size:13px;font-weight:600;
-  color:var(--text2);margin-bottom:6px;letter-spacing:.02em;
+  display:block; font-size:12px; font-weight:600;
+  color:var(--text2); margin-bottom:5px; letter-spacing:.02em;
 }
-.input-wrap{position:relative}
+.input-wrap{ position:relative }
 .input-icon{
-  position:absolute;left:13px;top:50%;transform:translateY(-50%);
-  font-size:15px;color:var(--text3);pointer-events:none;
+  position:absolute; left:12px; top:50%; transform:translateY(-50%);
+  font-size:14px; color:var(--text3); pointer-events:none;
 }
-input[type=text],input[type=password]{
-  width:100%;padding:11px 14px 11px 40px;
-  border:1.5px solid #DDD8D2;border-radius:10px;
-  font-family:var(--sans);font-size:14px;color:var(--text);
-  background:var(--cream);outline:none;
-  transition:border-color .2s,background .2s,box-shadow .2s;
+input[type=text], input[type=password], input[type=email], select{
+  width:100%; padding:9px 12px 9px 36px;
+  border:1.5px solid #DDD8D2; border-radius:9px;
+  font-family:var(--sans); font-size:13px; color:var(--text);
+  background:var(--cream); outline:none;
+  transition:border-color .2s, background .2s, box-shadow .2s;
 }
-input:focus{
-  border-color:var(--teal-600);background:var(--white);
+select{ padding-left:12px; cursor:pointer }
+input:focus, select:focus{
+  border-color:var(--teal-600); background:var(--white);
   box-shadow:0 0 0 3px rgba(26,107,107,.12);
 }
 .eye-btn{
-  position:absolute;right:12px;top:50%;transform:translateY(-50%);
-  background:none;border:none;cursor:pointer;
-  font-size:16px;color:var(--text3);padding:4px;
-  transition:color .15s;
+  position:absolute; right:10px; top:50%; transform:translateY(-50%);
+  background:none; border:none; cursor:pointer;
+  font-size:14px; color:var(--text3); padding:4px;
 }
-.eye-btn:hover{color:var(--teal-600)}
+.eye-btn:hover{ color:var(--teal-600) }
 
-.btn-login{
-  width:100%;padding:13px;
-  background:var(--teal-600);color:var(--white);
-  border:none;border-radius:10px;
-  font-family:var(--sans);font-size:15px;font-weight:700;
-  cursor:pointer;transition:all .2s var(--ease);
-  display:flex;align-items:center;justify-content:center;gap:8px;
-  margin-top:1.5rem;letter-spacing:.02em;
+.btn-main{
+  width:100%; padding:11px; background:var(--teal-600); color:var(--white);
+  border:none; border-radius:10px;
+  font-family:var(--sans); font-size:14px; font-weight:700;
+  cursor:pointer; transition:all .2s var(--ease);
+  display:flex; align-items:center; justify-content:center; gap:6px;
+  margin-top:1rem; letter-spacing:.02em;
 }
-.btn-login:hover{background:var(--teal-800);transform:translateY(-1px);box-shadow:0 6px 20px rgba(10,46,46,.25)}
-.btn-login:active{transform:translateY(0)}
-.btn-login:disabled{opacity:.55;cursor:not-allowed;transform:none}
+.btn-main:hover{ background:var(--teal-800); transform:translateY(-1px); box-shadow:0 6px 20px rgba(10,46,46,.25) }
+.btn-main:disabled{ opacity:.55; cursor:not-allowed; transform:none }
+
+.btn-google{
+  width:100%; padding:11px; background:var(--white); color:var(--text);
+  border:1.5px solid #DDD8D2; border-radius:10px;
+  font-family:var(--sans); font-size:13px; font-weight:600;
+  cursor:pointer; transition:all .15s;
+  display:flex; align-items:center; justify-content:center; gap:10px;
+  margin-top:.85rem;
+}
+.btn-google:hover{ background:#F8F6F2; border-color:var(--teal-600) }
+.btn-google svg{ width:18px; height:18px; flex-shrink:0 }
+
+/* Divider */
+.or-divider{
+  display:flex; align-items:center; gap:10px;
+  margin:1rem 0 .25rem;
+  font-size:11px; color:var(--text3);
+}
+.or-divider::before, .or-divider::after{
+  content:''; flex:1; height:1px; background:#EDE9E4;
+}
 
 /* Spinner */
-.spin{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
+.spin{ display:inline-block; width:14px; height:14px; border:2px solid rgba(255,255,255,.3); border-top-color:#fff; border-radius:50%; animation:spin .6s linear infinite }
+@keyframes spin{ to{transform:rotate(360deg)} }
 
 /* Alert */
 .alert{
-  display:none;align-items:flex-start;gap:10px;
-  padding:.75rem 1rem;border-radius:10px;
-  font-size:13px;margin-bottom:1.25rem;line-height:1.5;
+  display:none; align-items:flex-start; gap:8px;
+  padding:.6rem .85rem; border-radius:9px;
+  font-size:12px; margin-bottom:1rem; line-height:1.5;
 }
-.alert.error{background:var(--red-lt);border:1px solid #FFCDD2;color:var(--red)}
-.alert.success{background:var(--green-lt);border:1px solid #C8E6C9;color:var(--green)}
-.alert.show{display:flex}
-.alert-icon{font-size:16px;flex-shrink:0;margin-top:1px}
+.alert.error{ background:var(--red-lt); border:1px solid #FFCDD2; color:var(--red) }
+.alert.success{ background:var(--green-lt); border:1px solid #C8E6C9; color:var(--green) }
+.alert.info{ background:var(--blue-lt); border:1px solid #BBDEFB; color:var(--blue) }
+.alert.show{ display:flex }
+.alert-icon{ font-size:14px; flex-shrink:0; margin-top:1px }
 
-/* GAS URL config */
-.config-section{
-  border-top:1px solid #EDE9E4;margin-top:1.5rem;padding-top:1.25rem;
-}
+/* Config */
+.config-section{ border-top:1px solid #EDE9E4; margin-top:1.25rem; padding-top:1rem }
 .config-toggle{
-  display:flex;align-items:center;gap:6px;
-  background:none;border:none;cursor:pointer;
-  font-family:var(--sans);font-size:12px;color:var(--text3);
-  padding:0;transition:color .15s;
+  display:flex; align-items:center; gap:5px;
+  background:none; border:none; cursor:pointer;
+  font-family:var(--sans); font-size:11px; color:var(--text3); padding:0;
 }
-.config-toggle:hover{color:var(--teal-600)}
-.config-body{display:none;margin-top:.75rem}
-.config-body.open{display:block}
-.config-input-row{display:flex;gap:6px}
+.config-toggle:hover{ color:var(--teal-600) }
+.config-body{ display:none; margin-top:.6rem }
+.config-body.open{ display:block }
 .config-input{
-  flex:1;font-size:12px;padding:7px 10px;
-  border:1px solid #DDD8D2;border-radius:8px;
-  font-family:monospace;color:var(--text);background:var(--cream);
-  outline:none;
+  width:100%; font-size:11px; padding:6px 9px;
+  border:1px solid #DDD8D2; border-radius:7px;
+  font-family:monospace; color:var(--text); background:var(--cream); outline:none;
+  margin-bottom:6px;
 }
-.config-input:focus{border-color:var(--teal-600)}
 .config-save{
-  padding:7px 14px;background:var(--teal-600);color:#fff;
-  border:none;border-radius:8px;font-size:12px;font-weight:600;
-  cursor:pointer;font-family:var(--sans);transition:opacity .15s;white-space:nowrap;
+  padding:6px 12px; background:var(--teal-600); color:#fff;
+  border:none; border-radius:7px; font-size:11px; font-weight:600;
+  cursor:pointer; font-family:var(--sans);
 }
-.config-save:hover{opacity:.85}
 
 /* Footer */
 .card-footer{
-  padding:.9rem 2rem;background:#F8F6F2;
-  border-top:1px solid #EDE9E4;text-align:center;
+  padding:.75rem 2rem; background:#F8F6F2;
+  border-top:1px solid #EDE9E4; text-align:center;
 }
-.card-footer a{
-  font-size:12px;color:var(--text3);text-decoration:none;
-  transition:color .15s;
-}
-.card-footer a:hover{color:var(--teal-600)}
+.card-footer a{ font-size:11px; color:var(--text3); text-decoration:none }
+.card-footer a:hover{ color:var(--teal-600) }
 
-/* Role badge colors */
-.role-staff{color:#1565C0}
-.role-head{color:#6A1B9A}
-.role-admin{color:var(--red)}
+/* Pages */
+.page{ display:none; animation:fade .25s ease both }
+.page.active{ display:block }
+@keyframes fade{ from{opacity:0} to{opacity:1} }
+
+.row2{ display:grid; grid-template-columns:1fr 1fr; gap:8px }
+
+/* Role select */
+.role-options{ display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-top:4px }
+.role-opt{
+  padding:8px; border:1.5px solid #DDD8D2; border-radius:8px;
+  background:var(--cream); cursor:pointer; text-align:center;
+  font-size:11px; font-weight:600; color:var(--text2);
+  transition:all .15s;
+}
+.role-opt:hover{ border-color:var(--teal-400); color:var(--teal-600) }
+.role-opt.selected{ background:var(--teal-50); border-color:var(--teal-600); color:var(--teal-600) }
+.role-opt-icon{ font-size:16px; display:block; margin-bottom:2px }
 </style>
 </head>
 <body>
@@ -212,7 +238,6 @@ input:focus{
 <div class="bg-grid"></div>
 <span class="deco d1">✚</span>
 <span class="deco d2">✚</span>
-<span class="deco d3">✚</span>
 
 <div class="card">
   <!-- Header -->
@@ -222,171 +247,300 @@ input:focus{
     <div class="card-sub">SMART SODSAI SUPPLY · ระบบบริหารครุภัณฑ์</div>
   </div>
 
-  <!-- Body -->
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" id="tabLogin" onclick="switchTab('login')">🔓 เข้าสู่ระบบ</button>
+    <button class="tab" id="tabRegister" onclick="switchTab('register')">📝 สมัครสมาชิก</button>
+  </div>
+
   <div class="card-body">
-    <div class="system-badge">
-      <span class="system-badge-dot"></span>
-      เข้าสู่ระบบสำหรับเจ้าหน้าที่
+
+    <!-- ALERT -->
+    <div class="alert" id="alertBox">
+      <span class="alert-icon" id="alertIcon">⚠️</span>
+      <span id="alertMsg"></span>
     </div>
 
-    <!-- Alert -->
-    <div class="alert error" id="alertBox">
-      <span class="alert-icon">⚠️</span>
-      <span id="alertMsg">ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง</span>
-    </div>
+    <!-- ─── LOGIN PAGE ─── -->
+    <div class="page active" id="pageLogin">
+      <div class="system-badge"><span class="system-badge-dot"></span>เข้าสู่ระบบสำหรับเจ้าหน้าที่</div>
 
-    <!-- Form -->
-    <div class="form-group">
-      <label for="username">ชื่อผู้ใช้ (Username)</label>
-      <div class="input-wrap">
-        <span class="input-icon">👤</span>
-        <input type="text" id="username" placeholder="กรอกชื่อผู้ใช้" autocomplete="username">
-      </div>
-    </div>
-
-    <div class="form-group">
-      <label for="password">รหัสผ่าน (Password)</label>
-      <div class="input-wrap">
-        <span class="input-icon">🔒</span>
-        <input type="password" id="password" placeholder="กรอกรหัสผ่าน" autocomplete="current-password">
-        <button class="eye-btn" onclick="togglePwd()" type="button" id="eyeBtn" aria-label="แสดง/ซ่อนรหัสผ่าน">👁️</button>
-      </div>
-    </div>
-
-    <button class="btn-login" id="btnLogin" onclick="doLogin()">
-      <span id="btnText">🔓 เข้าสู่ระบบ</span>
-    </button>
-
-    <!-- GAS URL Config -->
-    <div class="config-section">
-      <button class="config-toggle" onclick="toggleConfig()" type="button">
-        ⚙️ ตั้งค่า Apps Script URL
-        <span id="configArrow">▸</span>
-      </button>
-      <div class="config-body" id="configBody">
-        <p style="font-size:11px;color:var(--text3);margin-bottom:6px;">ใส่ URL จาก Google Apps Script (Code_login.gs)</p>
-        <div class="config-input-row">
-          <input type="text" class="config-input" id="gasLoginUrl" placeholder="https://script.google.com/macros/s/.../exec">
-          <button class="config-save" onclick="saveGasUrl()">บันทึก</button>
+      <div class="form-group">
+        <label>ชื่อผู้ใช้ (Username)</label>
+        <div class="input-wrap">
+          <span class="input-icon">👤</span>
+          <input type="text" id="loginUser" placeholder="กรอกชื่อผู้ใช้">
         </div>
       </div>
+
+      <div class="form-group">
+        <label>รหัสผ่าน (Password)</label>
+        <div class="input-wrap">
+          <span class="input-icon">🔒</span>
+          <input type="password" id="loginPass" placeholder="กรอกรหัสผ่าน">
+          <button class="eye-btn" onclick="togglePwd('loginPass',this)" type="button">👁️</button>
+        </div>
+      </div>
+
+      <button class="btn-main" onclick="doLogin()" id="btnLogin">
+        <span id="btnLoginText">🔓 เข้าสู่ระบบ</span>
+      </button>
+
+      <div class="or-divider">หรือ</div>
+
+      <button class="btn-google" onclick="doGoogleLogin()" id="btnGoogle">
+        <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+        เข้าสู่ระบบด้วย Google
+      </button>
+    </div>
+
+    <!-- ─── REGISTER PAGE ─── -->
+    <div class="page" id="pageRegister">
+      <div class="system-badge"><span class="system-badge-dot"></span>สมัครบัญชีใหม่ ใช้ได้ทันที</div>
+
+      <div class="row2">
+        <div class="form-group">
+          <label>ชื่อผู้ใช้ *</label>
+          <div class="input-wrap">
+            <span class="input-icon">👤</span>
+            <input type="text" id="regUser" placeholder="เช่น staff01">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>ชื่อ-สกุล *</label>
+          <div class="input-wrap">
+            <span class="input-icon">👨‍⚕️</span>
+            <input type="text" id="regName" placeholder="ชื่อ-สกุล">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>อีเมล (Email)</label>
+        <div class="input-wrap">
+          <span class="input-icon">📧</span>
+          <input type="email" id="regEmail" placeholder="example@gmail.com">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>รหัสผ่าน * (ขั้นต่ำ 6 ตัว)</label>
+        <div class="input-wrap">
+          <span class="input-icon">🔒</span>
+          <input type="password" id="regPass" placeholder="กรอกรหัสผ่าน">
+          <button class="eye-btn" onclick="togglePwd('regPass',this)" type="button">👁️</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>ระดับสิทธิ์ *</label>
+        <div class="role-options">
+          <div class="role-opt selected" data-role="staff" onclick="selectRole('staff')">
+            <span class="role-opt-icon">👷</span>เจ้าหน้าที่
+          </div>
+          <div class="role-opt" data-role="head" onclick="selectRole('head')">
+            <span class="role-opt-icon">🧑‍💼</span>หัวหน้างาน
+          </div>
+          <div class="role-opt" data-role="admin" onclick="selectRole('admin')">
+            <span class="role-opt-icon">🔑</span>ผู้ดูแลระบบ
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-main" onclick="doRegister()" id="btnRegister">
+        <span id="btnRegisterText">📝 สมัครสมาชิก</span>
+      </button>
+    </div>
+
+    <!-- Config -->
+    <div class="config-section">
+      <button class="config-toggle" onclick="toggleConfig()" type="button">
+        ⚙️ ตั้งค่า Apps Script URL <span id="configArrow">▸</span>
+      </button>
+      <div class="config-body" id="configBody">
+        <input type="text" class="config-input" id="gasLoginUrl" placeholder="https://script.google.com/macros/s/.../exec">
+        <button class="config-save" onclick="saveGasUrl()">บันทึก</button>
+      </div>
     </div>
   </div>
 
-  <!-- Footer -->
-  <div class="card-footer">
-    <a href="index.html">← กลับหน้าเว็บโรงพยาบาล</a>
-  </div>
+  <div class="card-footer"><a href="index.html">← กลับหน้าเว็บโรงพยาบาล</a></div>
 </div>
 
 <script>
-// ── Load MOPH logo if saved ──
+var selectedRole = 'staff';
+
+// ── Init ──────────────────────────────────────────────────────────
 (function(){
-  const saved = localStorage.getItem('gasUrl_sodsai');
-  const url = localStorage.getItem('gasLoginUrl_sodsai');
+  var url = localStorage.getItem('gasLoginUrl_sodsai');
   if(url) document.getElementById('gasLoginUrl').value = url;
-  // Load MOPH logo
-  const moph = localStorage.getItem('moph_logo');
-  if(moph){
-    const w = document.getElementById('logoWrap');
-    w.innerHTML = `<img src="${moph}" alt="โลโก้">`;
-  }
+  var moph = localStorage.getItem('moph_logo');
+  if(moph) document.getElementById('logoWrap').innerHTML =
+    `<img src="${moph}" style="width:50px;height:50px;border-radius:50%;object-fit:cover">`;
 })();
 
-// ── Config ──────────────────────────────────────────────────────
-function toggleConfig(){
-  const b = document.getElementById('configBody');
-  const a = document.getElementById('configArrow');
+// ── Tabs ──────────────────────────────────────────────────────────
+function switchTab(name) {
+  hideAlert();
+  document.getElementById('tabLogin').classList.toggle('active', name==='login');
+  document.getElementById('tabRegister').classList.toggle('active', name==='register');
+  document.getElementById('pageLogin').classList.toggle('active', name==='login');
+  document.getElementById('pageRegister').classList.toggle('active', name==='register');
+}
+
+// ── Role select ───────────────────────────────────────────────────
+function selectRole(r) {
+  selectedRole = r;
+  document.querySelectorAll('.role-opt').forEach(function(el){
+    el.classList.toggle('selected', el.dataset.role === r);
+  });
+}
+
+// ── Config ────────────────────────────────────────────────────────
+function toggleConfig() {
+  var b = document.getElementById('configBody');
+  var a = document.getElementById('configArrow');
   b.classList.toggle('open');
   a.textContent = b.classList.contains('open') ? '▾' : '▸';
 }
-function saveGasUrl(){
-  const v = document.getElementById('gasLoginUrl').value.trim();
-  if(!v){ alert('กรุณาใส่ URL'); return; }
+function saveGasUrl() {
+  var v = document.getElementById('gasLoginUrl').value.trim();
+  if(!v){ showAlert('error','กรุณาใส่ URL'); return; }
   localStorage.setItem('gasLoginUrl_sodsai', v);
   showAlert('success','✅ บันทึก URL สำเร็จ');
-  setTimeout(()=>hideAlert(),2000);
+  setTimeout(hideAlert, 2000);
 }
 
-// ── Password toggle ──────────────────────────────────────────────
-function togglePwd(){
-  const i = document.getElementById('password');
-  const b = document.getElementById('eyeBtn');
-  if(i.type==='password'){ i.type='text'; b.textContent='🙈'; }
-  else { i.type='password'; b.textContent='👁️'; }
+// ── Password toggle ───────────────────────────────────────────────
+function togglePwd(id, btn) {
+  var i = document.getElementById(id);
+  if(i.type==='password'){ i.type='text'; btn.textContent='🙈'; }
+  else { i.type='password'; btn.textContent='👁️'; }
 }
 
-// ── Alert helpers ────────────────────────────────────────────────
-function showAlert(type, msg){
-  const box = document.getElementById('alertBox');
-  const txt = document.getElementById('alertMsg');
+// ── Alert ─────────────────────────────────────────────────────────
+function showAlert(type, msg) {
+  var box = document.getElementById('alertBox');
+  document.getElementById('alertMsg').textContent = msg;
+  var icons = {error:'⚠️',success:'✅',info:'ℹ️'};
+  document.getElementById('alertIcon').textContent = icons[type] || '⚠️';
   box.className = `alert ${type} show`;
-  txt.textContent = msg;
 }
 function hideAlert(){ document.getElementById('alertBox').classList.remove('show'); }
 
-// ── Login ────────────────────────────────────────────────────────
-async function doLogin(){
-  const user = document.getElementById('username').value.trim();
-  const pass = document.getElementById('password').value;
-  const url  = localStorage.getItem('gasLoginUrl_sodsai') ||
-               document.getElementById('gasLoginUrl').value.trim();
+// ── Login ─────────────────────────────────────────────────────────
+async function doLogin() {
+  var user = document.getElementById('loginUser').value.trim();
+  var pass = document.getElementById('loginPass').value;
+  var url  = localStorage.getItem('gasLoginUrl_sodsai') || document.getElementById('gasLoginUrl').value.trim();
 
   hideAlert();
   if(!user || !pass){ showAlert('error','กรุณากรอกชื่อผู้ใช้และรหัสผ่าน'); return; }
   if(!url){ showAlert('error','กรุณาตั้งค่า Apps Script URL ก่อน (คลิก ⚙️)'); return; }
 
-  setLoading(true);
-
+  setLoading('login', true);
   try {
-    const result = await jsonpFetch(url, { action:'login', username: user, password: pass });
+    var r = await jsonpFetch(url, { action:'login', username:user, password:pass });
+    if(r.success){ saveSession(r); showAlert('success', `✅ ยินดีต้อนรับ ${r.name}`); setTimeout(()=>location.href='sodsai-dashboard.html', 1000); }
+    else showAlert('error', r.message);
+  } catch(e) { showAlert('error', 'เชื่อมต่อไม่ได้: ' + e.message); }
+  finally { setLoading('login', false); }
+}
 
-    if(result.success){
-      // บันทึก session
-      const session = {
-        username : result.username,
-        name     : result.name,
-        role     : result.role,     // staff / head / admin
-        roleLabel: result.roleLabel,
-        loginAt  : Date.now(),
-        expires  : Date.now() + 8*60*60*1000  // 8 ชม.
-      };
-      sessionStorage.setItem('sodsai_session', JSON.stringify(session));
-      showAlert('success', `✅ ยินดีต้อนรับ ${result.name} (${result.roleLabel})`);
-      setTimeout(()=>{ window.location.href = 'sodsai-dashboard.html'; }, 1200);
+// ── Register ──────────────────────────────────────────────────────
+async function doRegister() {
+  var user  = document.getElementById('regUser').value.trim();
+  var name  = document.getElementById('regName').value.trim();
+  var email = document.getElementById('regEmail').value.trim();
+  var pass  = document.getElementById('regPass').value;
+  var url   = localStorage.getItem('gasLoginUrl_sodsai') || document.getElementById('gasLoginUrl').value.trim();
+
+  hideAlert();
+  if(!user || !name || !pass){ showAlert('error','กรุณากรอกข้อมูลที่มี * ให้ครบ'); return; }
+  if(pass.length < 6){ showAlert('error','รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร'); return; }
+  if(!url){ showAlert('error','กรุณาตั้งค่า Apps Script URL ก่อน'); return; }
+
+  setLoading('register', true);
+  try {
+    var r = await jsonpFetch(url, {
+      action:'register', username:user, password:pass,
+      name:name, role:selectedRole, email:email
+    });
+    if(r.success){
+      saveSession(r);
+      showAlert('success','🎉 สมัครสำเร็จ! กำลังเข้าสู่ระบบ...');
+      setTimeout(()=>location.href='sodsai-dashboard.html', 1500);
     } else {
-      showAlert('error', result.message || 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
+      showAlert('error', r.message);
     }
-  } catch(e) {
-    showAlert('error', 'เชื่อมต่อไม่ได้: ' + e.message);
-  } finally {
-    setLoading(false);
-  }
+  } catch(e) { showAlert('error', 'เชื่อมต่อไม่ได้: ' + e.message); }
+  finally { setLoading('register', false); }
 }
 
-function setLoading(on){
-  const btn = document.getElementById('btnLogin');
-  const txt = document.getElementById('btnText');
+// ── Google Login ──────────────────────────────────────────────────
+function doGoogleLogin() {
+  showAlert('info','💡 Google Login ต้องการการตั้งค่า OAuth — กำลังพัฒนา ใช้ Username/Password ไปก่อนนะครับ');
+  setTimeout(hideAlert, 4000);
+
+  // ทางเลือก: ใช้ prompt ขอ email ก่อน แล้วเช็คใน Sheet
+  setTimeout(async function(){
+    var email = prompt('ใส่ Gmail ของคุณ:');
+    if(!email) return;
+    var url = localStorage.getItem('gasLoginUrl_sodsai');
+    if(!url){ showAlert('error','กรุณาตั้งค่า URL ก่อน'); return; }
+    try {
+      var r = await jsonpFetch(url, { action:'loginGoogle', email:email });
+      if(r.success){ saveSession(r); showAlert('success', `ยินดีต้อนรับ ${r.name}`); setTimeout(()=>location.href='sodsai-dashboard.html', 1000); }
+      else if(r.needRegister){
+        showAlert('info','ยังไม่มีบัญชี กรุณาสมัครสมาชิกก่อน');
+        switchTab('register');
+        document.getElementById('regEmail').value = email;
+      } else showAlert('error', r.message);
+    } catch(e) { showAlert('error', e.message); }
+  }, 500);
+}
+
+// ── Session ───────────────────────────────────────────────────────
+function saveSession(r) {
+  var session = {
+    username : r.username, name : r.name,
+    role : r.role, roleLabel : r.roleLabel,
+    email : r.email||'',
+    loginAt : Date.now(), expires : Date.now() + 8*60*60*1000
+  };
+  sessionStorage.setItem('sodsai_session', JSON.stringify(session));
+}
+
+// ── Loading ───────────────────────────────────────────────────────
+function setLoading(which, on) {
+  var btn = document.getElementById(which==='login' ? 'btnLogin' : 'btnRegister');
+  var txt = document.getElementById(which==='login' ? 'btnLoginText' : 'btnRegisterText');
   btn.disabled = on;
-  txt.innerHTML = on ? '<span class="spin"></span> กำลังตรวจสอบ...' : '🔓 เข้าสู่ระบบ';
+  if(which==='login') txt.innerHTML = on ? '<span class="spin"></span> กำลังตรวจสอบ...' : '🔓 เข้าสู่ระบบ';
+  else txt.innerHTML = on ? '<span class="spin"></span> กำลังสมัคร...' : '📝 สมัครสมาชิก';
 }
 
-// ── JSONP (ข้าม CORS) ────────────────────────────────────────────
-function jsonpFetch(url, params){
-  return new Promise((resolve, reject) => {
-    const cb   = '_cb_' + Date.now();
-    const s    = document.createElement('script');
-    const tid  = setTimeout(()=>{ cleanup(); reject(new Error('Timeout')); }, 12000);
+// ── JSONP ─────────────────────────────────────────────────────────
+function jsonpFetch(url, params) {
+  return new Promise(function(resolve, reject) {
+    var cb = '_cb_' + Date.now();
+    var s  = document.createElement('script');
+    var tid = setTimeout(function(){ cleanup(); reject(new Error('Timeout')); }, 12000);
     function cleanup(){ clearTimeout(tid); delete window[cb]; if(s.parentNode) s.remove(); }
-    window[cb] = d => { cleanup(); resolve(d); };
-    s.src = url + '?' + new URLSearchParams({...params, callback:cb});
-    s.onerror = ()=>{ cleanup(); reject(new Error('โหลดไม่ได้ — ตรวจสอบ URL')); };
+    window[cb] = function(d){ cleanup(); resolve(d); };
+    s.src = url + '?' + new URLSearchParams(Object.assign({}, params, {callback:cb}));
+    s.onerror = function(){ cleanup(); reject(new Error('โหลดไม่ได้')); };
     document.head.appendChild(s);
   });
 }
 
-// ── Enter key ────────────────────────────────────────────────────
-document.addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
+// ── Enter key ─────────────────────────────────────────────────────
+document.addEventListener('keydown', function(e) {
+  if(e.key==='Enter') {
+    if(document.getElementById('pageLogin').classList.contains('active')) doLogin();
+    else doRegister();
+  }
+});
 </script>
 </body>
 </html>
